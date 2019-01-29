@@ -1,0 +1,27 @@
+Alpha Features:
+
+1.0:  Move, Dungeon Map (one contiguous map), free roam, attack (melee and ranged, switch),
+enemies, collision, sprites, center screen on character, top down, decent sized map,
+co-op/sp, 
+  
+
+2.0: animations, different enemies with different stats, classes 
+
+Beta Feature:
+
+Procedurally generated
+
+2.0: stats/level, items, Arena mode 
+
+
+Helpful Resources:
+
+https://gamedevacademy.org/html5-phaser-tutorial-top-down-games-with-tiled/
+
+http://phaser.io/tutorials/making-your-first-phaser-3-game
+
+https://gamedevacademy.org/create-a-basic-multiplayer-game-in-phaser-3-with-socket-io-part-1/
+
+https://phaser.io/news/2017/09/multiplayer-game-tutorial-part-1
+
+https://www.dynetisgames.com/2017/03/06/how-to-make-a-multiplayer-online-game-with-phaser-socket-io-and-node-js/
