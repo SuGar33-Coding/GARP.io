@@ -17,6 +17,9 @@ GARP.Preload.prototype = {
         // load game assets here
 
         this.load.spritesheet('player','assets/sprites/PlayerSprites.png',48,44);
+        this.load.spritesheet('attack','assets/sprites/attack.png');
+        this.load.spritesheet('baddie','assets/sprites/baddie.png');
+        this.load.spritesheet('baddieHurt','assets/sprites/baddieHurt.png');
         this.load.spritesheet('chest','assets/sprites/chest.png');
         this.load.spritesheet('zombie','assets/sprites/zombie.png');
         this.load.spritesheet('playButton', 'assets/images/playButton.png');

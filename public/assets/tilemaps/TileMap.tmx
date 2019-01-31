@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="9">
+<map version="1.2" tiledversion="1.2.2" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="32" tileheight="32" infinite="0" nextlayerid="5" nextobjectid="10">
  <tileset firstgid="1" name="DungeonSet" tilewidth="32" tileheight="32" tilecount="256" columns="16">
   <image source="DungeonTileSet.png" width="512" height="512"/>
  </tileset>
@@ -220,5 +220,6 @@
   <object id="6" type="item" gid="192" x="756.727" y="1746.3" width="32" height="32"/>
   <object id="7" type="item" gid="192" x="1387.03" y="1746.3" width="32" height="32"/>
   <object id="8" type="door" gid="8" x="1408" y="1888.67" width="32" height="32"/>
+  <object id="9" type="enemy" gid="163" x="970" y="1766" width="32" height="32"/>
  </objectgroup>
 </map>

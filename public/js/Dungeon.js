@@ -20,8 +20,8 @@ GARP.Dungeon.prototype = {
         this.backgroundlayer.resizeWorld();
 
         // Dealing with player
-        var result = this.findObjectsByType('playerStart', this.map, 'objectLayer');
-        this.player = this.add.sprite(result[0].x, result[0].y, 'player');
+        var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
+        this.player = this.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
         this.player.anchor.setTo(.5);
 
         this.game.physics.arcade.enable(this.player);
@@ -31,7 +31,16 @@ GARP.Dungeon.prototype = {
         this.player.animations.add('rightWalk', [0]);
         this.player.animations.add('leftWalk',[1]);
 
-        //this.game.world.setBounds(0, 0, 1000, 1000);
+        // Dealing with baddie
+        var baddieStarts = this.findObjectsByType('enemy',this.map,'objectLayer');
+        this.enemy = this.add.sprite(baddieStarts[0].x, baddieStarts[0].y, 'baddie');
+        this.enemy.anchor.setTo(.5);
+        this.enemy.health = 30;
+
+        this.actors = this.game.add.group();
+        this.actors.add(this.player);
+        this.actors.add(this.enemy);
+        this.game.physics.arcade.enable(this.actors);
 
         this.game.camera.follow(this.player);
 
@@ -43,6 +52,14 @@ GARP.Dungeon.prototype = {
             left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
             right: this.game.input.keyboard.addKey(Phaser.Keyboard.D)
         }
+
+        this.game.input.onDown.add(function(){
+            this.attack = this.add.sprite(this.player.x,this.player.y-48,'attack');
+            this.attack.anchor.setTo(0.5);
+            this.game.physics.arcade.enable(this.attack);
+            this.game.physics.arcade.overlap(this.attack, this.actors, this.damage, null, this);
+            this.attack.destroy();
+        },this);
 
 
         this.createItems();
@@ -60,6 +77,11 @@ GARP.Dungeon.prototype = {
     },
 
     update: function () {
+        // Collision
+        this.game.physics.arcade.collide(this.actors, this.wallLayer);
+        this.game.physics.arcade.collide(this.actors, this.actors);
+        this.game.physics.arcade.overlap(this.actors, this.items, this.collect, null, this);
+
         var speed = 120;
         this.player.body.velocity.y = 0;
         this.player.body.velocity.x = 0;
@@ -78,14 +100,17 @@ GARP.Dungeon.prototype = {
             this.player.animations.play('rightWalk');
         }
 
-        // Collision
-        this.game.physics.arcade.collide(this.player, this.wallLayer);
-        this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
+        if(this.enemy.health < 1){
+            this.enemy.destroy();
+        }
+    },
+
+    damage: function(weapon, attacked){
+        attacked.health -= 10;
+        console.log(attacked.health);
     },
 
     collect: function(player,chest) {
-        console.log('ez munee');
-
         chest.destroy();
     },
 
@@ -94,7 +119,6 @@ GARP.Dungeon.prototype = {
         var result = new Array();
         map.objects[layer].forEach(function(element){
           if(element.type === type) {
-              console.log(element.type);
             element.y -= map.tileHeight;
             result.push(element);
           }      
