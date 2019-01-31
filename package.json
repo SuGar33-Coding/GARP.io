@@ -1,0 +1,22 @@
+{
+  "name": "garp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tsbraun1891/GARP.io.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tsbraun1891/GARP.io/issues"
+  },
+  "homepage": "https://github.com/tsbraun1891/GARP.io#readme",
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}

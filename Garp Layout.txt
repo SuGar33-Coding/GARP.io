@@ -18,6 +18,8 @@ Helpful Resources:
 
 https://gamedevacademy.org/html5-phaser-tutorial-top-down-games-with-tiled/
 
+https://gamedevacademy.org/html5-phaser-tutorial-spacehipster-a-space-exploration-game/
+
 http://phaser.io/tutorials/making-your-first-phaser-3-game
 
 https://gamedevacademy.org/create-a-basic-multiplayer-game-in-phaser-3-with-socket-io-part-1/

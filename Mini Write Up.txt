@@ -1,0 +1,5 @@
+Step 1:  learned basics of javascript coding for gaming, see first video in playlist
+
+Step 2: made a small game, boxpusher
+
+Step 3: Learn phaser and node js
