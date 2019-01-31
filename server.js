@@ -13,4 +13,5 @@ app.get('/', function(req, res){
 
 server.listen(8081, function () {
     console.log(`Listening on ${server.address().port}`);
+    console.log(`Addres should be: http://localhost:${server.address().port}`);
 });
