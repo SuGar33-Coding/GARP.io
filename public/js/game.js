@@ -10,4 +10,3 @@ GARP.game.state.add('Dungeon', GARP.Dungeon);
 
 
 GARP.game.state.start('Boot');
-
