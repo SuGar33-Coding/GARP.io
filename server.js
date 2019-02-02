@@ -14,7 +14,7 @@ app.get('/', function(req, res){
 
 // Start listening
 server.listen(8081, function () {
-    server.clientUpdateRate = 1000/10; // Rate at which update packets are sent
+    server.clientUpdateRate = 1000/60; // Rate at which update packets are sent
     server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
@@ -23,7 +23,7 @@ server.listen(8081, function () {
 // ===========Websocket Stuff==============
 
 // list of all players in game
-players = {};
+var players = {};
 
 io.on('connection', (client) => {
     console.log("Connection with ID: " + client.id);
@@ -37,10 +37,16 @@ io.on('connection', (client) => {
         }
         players[client.id] = player;
         console.log("added: "+ player);
+        console.log(players);
     });
 
-    client.on('playerMoved', (data) => {
+    client.on('playerMoved', (playerData) => {
+        players[client.id].xPos = playerData.xPos;
+        players[client.id].yPos = playerData.yPos;
+    });
 
+    client.on('enterDungeon', () => {
+        client.join("dungeon");
     });
 
     client.on('test', (message) => {
@@ -49,13 +55,13 @@ io.on('connection', (client) => {
 
     client.on('disconnect', () => {
         delete players[client.id];
+        console.log("Disconnection and removal with ID: " + client.id);
     });
 });
 
 server.sendUpdate = function() {
-    io.emit('updatePlayers', players);
+    io.to("dungeon").emit('updatePlayers', players);
     //console.log("sent update!");
-    console.log(players);
 }
 
 server.setUpdateLoop = function(){

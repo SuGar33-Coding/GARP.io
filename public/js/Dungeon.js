@@ -1,11 +1,9 @@
-GARP.Dungeon = function () { };
+var GARP = GARP || {};
 
-GARP.Dungeon.prototype = {
+GARP.Dungeon = {
 
     create: function () {
-        this.instance = this;
-
-        // Setting up the map
+        // ======Setting up the map=============
 
         this.map = this.game.add.tilemap('dungeon');
 
@@ -18,7 +16,7 @@ GARP.Dungeon.prototype = {
 
         this.backgroundlayer.resizeWorld();
 
-        // Dealing with player
+        // ========Dealing with player===========
         var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
         this.player = this.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
         this.player.anchor.setTo(.5);
@@ -31,35 +29,14 @@ GARP.Dungeon.prototype = {
         this.player.animations.add('leftWalk', [1]);
 
         GARP.Client.sendPlayer(this.player.x, this.player.y);
-        GARP.Client.testFunc();
+        //GARP.Client.testFunc();
+        //console.log(this.player.position);
 
-        // Dealing with other players
+        // =========Dealing with other players=========
         this.otherPlayers = this.add.group();
-        this.otherPlayers.forEach(bitch => {
-            console.log(bitch);
-        });
-        GARP.Client.socket.on('updatePlayers', (playerList) => {
-            //GARP.Dungeon.prototype.updateOtherPlayers(playerList);
-            //this.updateOtherPlayers(playerList);
-            Object.keys(playerList).forEach(id => {
-                if (id !== GARP.Client.socket.id) {
-                    let indexedPlayer = null;
-                    this.otherPlayers.forEach(otherPlayer => {
-                        if (id === otherPlayer.id) {
-                            indexedPlayer = otherPlayer;
-                        }
-                    }, this);
-                    if (indexedPlayer) { // if player exists in otherPlayers
-                        indexedPlayer.x = playerList[id].xPos;
-                        indexedPlayer.y = playerList[id].yPos;
-                    } else { // if not, create one
-                        this.createOtherPlayer(playerList[id]);
-                    }
-                }
-            });
-        });
+        //console.log(this.otherPlayers);
 
-        // Dealing with baddie
+        // =========Dealing with baddie==============
         var baddieStarts = this.findObjectsByType('enemy', this.map, 'objectLayer');
         this.enemy = this.add.sprite(baddieStarts[0].x, baddieStarts[0].y, 'baddie');
         this.enemy.anchor.setTo(.5);
@@ -91,6 +68,9 @@ GARP.Dungeon.prototype = {
 
 
         this.createItems();
+
+        // ============Start update loop==============
+        GARP.Client.enteredDungeon();
     },
 
     createItems: function () {
@@ -126,10 +106,15 @@ GARP.Dungeon.prototype = {
         else if (this.cursors.right.isDown || this.wasd.right.isDown) {
             this.player.body.velocity.x += speed;
             this.player.animations.play('rightWalk');
+            
         }
 
         if (this.enemy.health < 1) {
             this.enemy.destroy();
+        }
+
+        if (this.player.positon !== this.player.previousPosition) {
+            GARP.Client.playerMoved({xPos: this.player.x, yPos: this.player.y});
         }
     },
 
@@ -174,22 +159,27 @@ GARP.Dungeon.prototype = {
         console.log("created " + otherPlayer);
     },
 
-    // Update all other players' positions for Client
-    /*
+    /**
+     * Is called every time the server sends update information
+     * Simply updates non-client player positions
+     * @param {id: {id: id, xPos: x, yPos: y}} playerList 
+     */
     updateOtherPlayers: function (playerList) {
-        playerList.forEach(player => {
-            let indexedPlayer = null;
-            this.otherPlayers.forEach(otherPlayer => {
-                if (player.id === otherPlayer.id) {
-                    indexedPlayer = otherPlayer;
+        Object.keys(playerList).forEach(id => {
+            if (id !== GARP.Client.socket.id) {
+                let indexedPlayer = null;
+                this.otherPlayers.forEach(otherPlayer => {
+                    if (id === otherPlayer.id) {
+                        indexedPlayer = otherPlayer; // grab an instance of the player referred by the id
+                    }
+                }, this);
+                if (indexedPlayer) { // if player exists in otherPlayers, change its Pos
+                    indexedPlayer.x = playerList[id].xPos;
+                    indexedPlayer.y = playerList[id].yPos;
+                } else { // if not, create one
+                    this.createOtherPlayer(playerList[id]);
                 }
-            }, this);
-            if (indexedPlayer) { // if player exists in otherPlayers
-                otherPlayer.x = indexedPlayer.xPos;
-                otherPlayer.y = indexedPlayer.yPos;
-            } else { // if not, create one
-                this.createOtherPlayer(player)
             }
         });
-    }*/
+    }
 }
