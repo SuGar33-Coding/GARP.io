@@ -11,7 +11,10 @@ Beta Feature:
 
 Procedurally generated
 
-2.0: stats/level, items, Arena mode 
+2.0: stats/level, items, Arena mode
+
+Ideas:
+Wall spell
 
 
 Helpful Resources:

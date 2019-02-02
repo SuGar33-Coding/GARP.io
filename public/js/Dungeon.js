@@ -23,12 +23,15 @@ GARP.Dungeon.prototype = {
         var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
         this.player = this.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
         this.player.anchor.setTo(.5);
+        this.player.scale.setTo(2)
+        this.player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
 
         this.game.physics.arcade.enable(this.player);
         this.playerSpeed = 120;
         this.player.body.collideWorldBounds = true;
 
         this.spear = this.player.addChild(this.make.sprite(10,-16,'spear'));
+        this.game.physics.arcade.enable(this.spear);
 
         //this.player.animations.add('rightWalk', [0]);
         //this.player.animations.add('leftWalk',[1]);
@@ -40,13 +43,14 @@ GARP.Dungeon.prototype = {
         this.enemy.health = 30;
 
         this.actors = this.game.add.group();
-        this.actors.add(this.player);
+        this.game.physics.arcade.enable(this.player);
         this.actors.add(this.enemy);
         this.game.physics.arcade.enable(this.actors);
 
         this.game.camera.follow(this.player);
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
+
 
         this.wasd = {
             up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
@@ -57,28 +61,49 @@ GARP.Dungeon.prototype = {
 
         this.game.input.onDown.add(function () {
             var angleInRad = this.game.physics.arcade.angleToPointer(this.player)
-            console.log(angleInRad)
+
             if ((angleInRad >= -0.3926991) && (angleInRad <= 0.3926991)) { // Attack to the right
-                this.attack = this.add.sprite(this.player.x + this.player.width / 2 + 8, this.player.y, 'attack');
+                this.spear.angle = 90;
+                this.spear.x = this.player.width/2;
+                this.spear.y = 0;
             } else if ((angleInRad > .3926991) && (angleInRad <= 1.178097)) { // Attack bottom right
-                this.attack = this.add.sprite(this.player.x + this.player.width / 2 + 8, this.player.y + this.player.height / 2 + 8, 'attack');
+                this.spear.angle = 135;
+                this.spear.x = this.player.width/2;
+                this.spear.y = this.player.height/2;
             } else if ((angleInRad > 1.178097) && (angleInRad <= 1.9634954)) { // Attack Down
-                this.attack = this.add.sprite(this.player.x, this.player.y + this.player.height / 2 + 8, 'attack');
+                this.spear.angle = 180;
+                this.spear.x = 0;
+                this.spear.y = this.player.height/2;
             } else if ((angleInRad > 1.9634954) && (angleInRad <= 2.7488936)) { // Attack Bottom left
-                this.attack = this.add.sprite(this.player.x - this.player.width / 2 - 8, this.player.y + this.player.height / 2 + 8, 'attack');
+                this.spear.angle = 225;
+                this.spear.x = -this.player.width/2;
+                this.spear.y = this.player.height/2;
             } else if ((angleInRad > 2.7488936) || (angleInRad <= -2.7488936)) { // Attack Left
-                this.attack = this.add.sprite(this.player.x - this.player.width / 2 - 8, this.player.y, 'attack');
+                this.spear.angle = 270;
+                this.spear.x = -this.player.width/2;
+                this.spear.y = 0;
             } else if ((angleInRad > -2.7488936) && (angleInRad <= -1.9634954)) { // Attack Top Left
-                this.attack = this.add.sprite(this.player.x - this.player.width / 2 - 8, this.player.y - this.player.height / 2 - 8, 'attack');
+                this.spear.angle = 315;
+                this.spear.x = -this.player.width/2;
+                this.spear.y = -this.player.height/2;
             } else if ((angleInRad > -1.9634954) && (angleInRad <= -1.178097)) { // Attack Up
-                this.attack = this.add.sprite(this.player.x, this.player.y - this.player.height / 2 - 8, 'attack');
+                this.spear.x = 0;
+                this.spear.y = -this.player.height/2;
             } else if ((angleInRad > -1.178097) && (angleInRad <= -0.3926991)) { // Attack top right
-                this.attack = this.add.sprite(this.player.x + this.player.width / 2 + 8, this.player.y - this.player.height / 2 - 8, 'attack');
+                this.spear.angle = 45;
+                this.spear.x = this.player.width/2;
+                this.spear.y = -this.player.height/2;
             }
-            this.attack.anchor.setTo(0.5);
-            this.attack.scale.setTo(.5)
-            this.game.physics.arcade.enable(this.attack);
-            this.game.physics.arcade.overlap(this.attack, this.actors, this.damage, null, this);
+
+            this.game.time.events.add(50, function(){
+                this.game.physics.arcade.overlap(this.spear, this.actors, this.damage, null, this);
+            },this);
+            
+            this.game.time.events.add(300, function(){
+                this.spear.angle = 0;
+                this.spear.x = 10;
+                this.spear.y = -16;
+            },this);
             //this.attack.destroy();
         }, this);
 
@@ -99,10 +124,11 @@ GARP.Dungeon.prototype = {
 
     update: function () {
         // Collision
-
+        this.game.physics.arcade.collide(this.player, this.wallLayer);
         this.game.physics.arcade.collide(this.actors, this.wallLayer);
         this.game.physics.arcade.collide(this.actors, this.actors);
-        this.game.physics.arcade.overlap(this.actors, this.items, this.collect, null, this);
+        this.game.physics.arcade.collide(this.player, this.actors);
+        this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
 
         var speed = 120;
         this.player.body.velocity.y = 0;
@@ -129,7 +155,6 @@ GARP.Dungeon.prototype = {
 
     damage: function (weapon, attacked) {
         attacked.health -= 10;
-        console.log(attacked.health);
     },
 
     collect: function (player, chest) {
