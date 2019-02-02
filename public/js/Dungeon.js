@@ -1,6 +1,7 @@
 var GARP = GARP || {};
 
 GARP.Dungeon = {
+    spriteScale: 2,
 
     create: function () {
         // ======Setting up the map=============
@@ -20,7 +21,7 @@ GARP.Dungeon = {
         var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
         this.player = this.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
         this.player.anchor.setTo(.5);
-        this.player.scale.setTo(2)
+        this.player.scale.setTo(this.spriteScale);
         this.player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
 
         this.game.physics.arcade.enable(this.player);
@@ -201,6 +202,7 @@ GARP.Dungeon = {
     createOtherPlayer: function (playerData) {
         let otherPlayer = this.add.sprite(playerData.xPos, playerData.yPos, 'player');
         otherPlayer.anchor.setTo(0.5);
+        otherPlayer.scale.setTo(this.spriteScale);
         otherPlayer.id = playerData.id;
         this.otherPlayers.add(otherPlayer);
         console.log("created " + otherPlayer);

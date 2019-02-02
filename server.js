@@ -8,13 +8,13 @@ var io = require('socket.io').listen(server);
 // Request routing
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', function(req, res){
+app.get('/', function (req, res) {
     res.sendFile(__dirname + '/index.html');
 });
 
 // Start listening
 server.listen(8081, function () {
-    server.clientUpdateRate = 1000/60; // Rate at which update packets are sent
+    server.clientUpdateRate = 1000 / 60; // Rate at which update packets are sent
     server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
@@ -36,13 +36,29 @@ io.on('connection', (client) => {
             yPos: playerData.yPos
         }
         players[client.id] = player;
-        console.log("added: "+ player);
+        console.log("Player list: ");
         console.log(players);
     });
 
     client.on('playerMoved', (playerData) => {
-        players[client.id].xPos = playerData.xPos;
-        players[client.id].yPos = playerData.yPos;
+        if (players[client.id]) { //check for erroneous server restart with peristent client
+            players[client.id].xPos = playerData.xPos;
+            players[client.id].yPos = playerData.yPos;
+        } else { //TODO: Implement a way for the client to reconcile this too...
+            //console.log("Player no longer exists on server, creating new server-side player instance");
+            console.log("Player no longer exists on server...");
+            
+            // this only adds the player on server side, the client doesn't recognize the new socket id's
+            player = {
+                id: client.id,
+                xPos: playerData.xPos,
+                yPos: playerData.yPos
+            }
+            players[client.id] = player;
+            console.log("Player list: ");
+            console.log(players);
+            
+        }
     });
 
     client.on('enterDungeon', () => {
@@ -59,11 +75,10 @@ io.on('connection', (client) => {
     });
 });
 
-server.sendUpdate = function() {
+server.sendUpdate = function () {
     io.to("dungeon").emit('updatePlayers', players);
-    //console.log("sent update!");
 }
 
-server.setUpdateLoop = function(){
-    setInterval(server.sendUpdate,server.clientUpdateRate);
+server.setUpdateLoop = function () {
+    setInterval(server.sendUpdate, server.clientUpdateRate);
 };
