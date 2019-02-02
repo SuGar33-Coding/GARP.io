@@ -34,7 +34,7 @@ GARP.Dungeon = {
         //this.player.animations.add('rightWalk', [0]);
         //this.player.animations.add('leftWalk',[1]);
 
-        // Dealing with baddie
+        // =========Dealing with baddie=============
         GARP.Client.sendPlayer(this.player.x, this.player.y);
         //GARP.Client.testFunc();
         //console.log(this.player.position);
