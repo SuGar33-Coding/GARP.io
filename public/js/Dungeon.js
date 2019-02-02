@@ -28,8 +28,9 @@ GARP.Dungeon = {
         this.playerSpeed = 120;
         this.player.body.collideWorldBounds = true;
 
-        this.spear = this.player.addChild(this.make.sprite(10,-16,'spear'));
+        this.spear = this.player.addChild(this.make.sprite(10,0,'spear'));
         this.game.physics.arcade.enable(this.spear);
+        this.spear.anchor.setTo(.5);
 
         //this.player.animations.add('rightWalk', [0]);
         //this.player.animations.add('leftWalk',[1]);
@@ -71,7 +72,7 @@ GARP.Dungeon = {
 
             if ((angleInRad >= -0.3926991) && (angleInRad <= 0.3926991)) { // Attack to the right
                 this.spear.angle = 90;
-                this.spear.x = this.player.width/2;
+                this.spear.x = (this.player.width/2);
                 this.spear.y = 0;
             } else if ((angleInRad > .3926991) && (angleInRad <= 1.178097)) { // Attack bottom right
                 this.spear.angle = 135;
@@ -109,7 +110,7 @@ GARP.Dungeon = {
             this.game.time.events.add(300, function(){
                 this.spear.angle = 0;
                 this.spear.x = 10;
-                this.spear.y = -16;
+                this.spear.y = 0;
             },this);
             //this.attack.destroy();
         }, this);
