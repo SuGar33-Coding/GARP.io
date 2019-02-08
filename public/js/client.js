@@ -1,35 +1,34 @@
-var GARP = GARP || {};
+export default class Client {
+    constructor() {
+        this.socket = io.connect();
 
-GARP.Client = {
-    sendPlayer: function(x, y) {
+        this.socket.on('check', (data) => {
+            console.log(data)
+        });
+        this.socket.on('updatePlayers', (playerList) => {
+            //GARP.Dungeon.prototype.updateOtherPlayers(playerList);
+            //this.updateOtherPlayers(playerList);
+            GARP.Dungeon.updateOtherPlayers(playerList);
+        });
+    }
+
+    sendPlayer(x, y) {
         playerData = {
             xPos: x,
             yPos: y
         }
         this.socket.emit('addPlayerToServer', playerData);
-    },
+    }
 
-    testFunc: function() {
+    testFunc() {
         this.socket.emit('test', "Test Went Thru");
-    },
+    }
 
-    enteredDungeon: function() {
+    enteredDungeon() {
         GARP.Client.socket.emit('enterDungeon');
-    },
+    }
 
-    playerMoved: function(playerData) {
+    playerMoved(playerData) {
         GARP.Client.socket.emit('playerMoved', playerData);
     }
 };
-
-GARP.Client.socket = io.connect();
-
-GARP.Client.socket.on('check', (data) => {
-    console.log(data)
-});
-
-GARP.Client.socket.on('updatePlayers', (playerList) => {
-    //GARP.Dungeon.prototype.updateOtherPlayers(playerList);
-    //this.updateOtherPlayers(playerList);
-    GARP.Dungeon.updateOtherPlayers(playerList);
-});
