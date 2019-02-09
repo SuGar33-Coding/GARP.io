@@ -9,8 +9,6 @@ export default class Client {
             console.log(data)
         });
         this.socket.on('updatePlayers', (playerList) => {
-            //GARP.Dungeon.prototype.updateOtherPlayers(playerList);
-            //this.updateOtherPlayers(playerList);
             this.state.updateOtherPlayers(playerList);
         });
     }
