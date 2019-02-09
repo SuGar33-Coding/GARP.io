@@ -1,5 +1,8 @@
+import Dungeon from './states/Dungeon.js'
+
 export default class Client {
-    constructor() {
+    constructor(dungeonState) {
+        this.state = dungeonState;
         this.socket = io.connect();
 
         this.socket.on('check', (data) => {
@@ -8,12 +11,12 @@ export default class Client {
         this.socket.on('updatePlayers', (playerList) => {
             //GARP.Dungeon.prototype.updateOtherPlayers(playerList);
             //this.updateOtherPlayers(playerList);
-            GARP.Dungeon.updateOtherPlayers(playerList);
+            this.state.updateOtherPlayers(playerList);
         });
     }
 
     sendPlayer(x, y) {
-        playerData = {
+        let playerData = {
             xPos: x,
             yPos: y
         }
@@ -25,10 +28,10 @@ export default class Client {
     }
 
     enteredDungeon() {
-        GARP.Client.socket.emit('enterDungeon');
+        this.socket.emit('enterDungeon');
     }
 
     playerMoved(playerData) {
-        GARP.Client.socket.emit('playerMoved', playerData);
+        this.socket.emit('playerMoved', playerData);
     }
 };

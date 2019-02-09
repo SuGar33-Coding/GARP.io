@@ -1,9 +1,12 @@
+import Client from '../client.js'
+
 export default class Dungeon extends Phaser.State {
     constructor() {
+        super();
         this.spriteScale = 2;
+        this.client = new Client(this);
     }
     
-
     create() {
         // ======Setting up the map=============
 
@@ -37,8 +40,8 @@ export default class Dungeon extends Phaser.State {
         //this.player.animations.add('leftWalk',[1]);
 
         // =========Dealing with baddie=============
-        GARP.Client.sendPlayer(this.player.x, this.player.y);
-        //GARP.Client.testFunc();
+        this.client.sendPlayer(this.player.x, this.player.y);
+        //this.client.testFunc();
         //console.log(this.player.position);
 
         // =========Dealing with other players=========
@@ -120,7 +123,7 @@ export default class Dungeon extends Phaser.State {
         this.createItems();
 
         // ============Start update loop==============
-        GARP.Client.enteredDungeon();
+        this.client.enteredDungeon();
     }
 
     createItems() {
@@ -128,7 +131,7 @@ export default class Dungeon extends Phaser.State {
         this.items.enableBody = true;
 
         var item;
-        result = this.findObjectsByType('item', this.map, 'objectLayer');
+        let result = this.findObjectsByType('item', this.map, 'objectLayer');
         result.forEach(function (element) {
             this.createFromTiledObject(element, this.items);
         }, this);
@@ -165,7 +168,7 @@ export default class Dungeon extends Phaser.State {
         }
 
         if (this.player.positon !== this.player.previousPosition) {
-            GARP.Client.playerMoved({xPos: this.player.x, yPos: this.player.y});
+            this.client.playerMoved({xPos: this.player.x, yPos: this.player.y});
         }
     }
 
@@ -217,7 +220,7 @@ export default class Dungeon extends Phaser.State {
      */
     updateOtherPlayers(playerList) {
         Object.keys(playerList).forEach(id => {
-            if (id !== GARP.Client.socket.id) {
+            if (id !== this.client.socket.id) {
                 let indexedPlayer = null;
                 this.otherPlayers.forEach(otherPlayer => {
                     if (id === otherPlayer.id) {

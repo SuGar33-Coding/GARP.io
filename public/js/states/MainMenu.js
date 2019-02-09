@@ -6,7 +6,7 @@ export default class MainMenu extends Phaser.State {
         this.title.anchor.setTo(0.5);
         this.title.scale.setTo(2);
 
-        playButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY, 'playButton', this.actionOnClick, this, 2, 1, 0);
+        let playButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY, 'playButton', this.actionOnClick, this, 2, 1, 0);
         playButton.anchor.setTo(0.5);
 
     }
