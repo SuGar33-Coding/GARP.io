@@ -72,6 +72,8 @@ io.on('connection', (client) => {
     client.on('disconnect', () => {
         delete players[client.id];
         console.log("Disconnection and removal with ID: " + client.id);
+        console.log("Player list: ");
+            console.log(players);
     });
 });
 

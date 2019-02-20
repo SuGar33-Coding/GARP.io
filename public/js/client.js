@@ -9,7 +9,7 @@ export default class Client {
             console.log(data)
         });
         this.socket.on('updatePlayers', (playerList) => {
-            this.state.updateOtherPlayers(playerList);
+            this.state.refreshOtherPlayers(playerList);
         });
     }
 

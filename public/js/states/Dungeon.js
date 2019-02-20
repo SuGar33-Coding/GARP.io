@@ -216,6 +216,8 @@ export default class Dungeon extends Phaser.State {
     /**
      * Is called every time the server sends update information
      * Simply updates non-client player positions
+     * 
+     * refreshOtherPlayers is currently being used instead
      * @param {id: {id: id, xPos: x, yPos: y}} playerList 
      */
     updateOtherPlayers(playerList) {
@@ -233,6 +235,20 @@ export default class Dungeon extends Phaser.State {
                 } else { // if not, create one
                     this.createOtherPlayer(playerList[id]);
                 }
+            }
+        });
+    }
+
+    /**
+     * Keeps other players fully consistent with the player list on the server
+     * Destroys existing sprites and Creates sprites for each update
+     * @param {*} playerList 
+     */
+    refreshOtherPlayers(playerList) {
+        this.otherPlayers.removeAll(true);
+        Object.keys(playerList).forEach(id => {
+            if (id !== this.client.socket.id) {
+                this.createOtherPlayer(playerList[id]);
             }
         });
     }
