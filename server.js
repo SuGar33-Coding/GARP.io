@@ -33,7 +33,10 @@ io.on('connection', (client) => {
         player = {
             id: client.id,
             xPos: playerData.xPos,
-            yPos: playerData.yPos
+            yPos: playerData.yPos,
+            xPosSpear: playerData.xPosSpear,
+            yPosSpear: playerData.yPosSpear,
+            angleSpear: playerData.angleSpear
         }
         players[client.id] = player;
         console.log("Player list: ");
@@ -41,7 +44,8 @@ io.on('connection', (client) => {
     });
 
     client.on('playerMoved', (playerData) => {
-        if (players[client.id]) { //check for erroneous server restart with peristent client
+        /* check for erroneous server restart with peristent client */
+        if (players[client.id]) { // If player does indeed exist on the current player list
             players[client.id].xPos = playerData.xPos;
             players[client.id].yPos = playerData.yPos;
         } else { //TODO: Implement a way for the client to reconcile this too...
@@ -52,12 +56,14 @@ io.on('connection', (client) => {
             player = {
                 id: client.id,
                 xPos: playerData.xPos,
-                yPos: playerData.yPos
+                yPos: playerData.yPos,
+                xPosSpear: playerData.xPosSpear,
+                yPosSpear: playerData.yPosSpear,
+                angleSpear: playerData.angleSpear
             }
             players[client.id] = player;
             console.log("Player list: ");
             console.log(players);
-            
         }
     });
 

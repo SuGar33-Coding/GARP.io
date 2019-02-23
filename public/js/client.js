@@ -13,10 +13,13 @@ export default class Client {
         });
     }
 
-    sendPlayer(x, y) {
+    sendPlayer(x, y, xSpear, ySpear, angleSpear) {
         let playerData = {
             xPos: x,
-            yPos: y
+            yPos: y,
+            xPosSpear: xSpear,
+            yPosSpear: ySpear,
+            angleSpear: angleSpear
         }
         this.socket.emit('addPlayerToServer', playerData);
     }

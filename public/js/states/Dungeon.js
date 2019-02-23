@@ -32,17 +32,15 @@ export default class Dungeon extends Phaser.State {
         this.playerSpeed = 120;
         this.player.body.collideWorldBounds = true;
 
+        /* Teh SP34R */
         this.spear = this.player.addChild(this.make.sprite(10,0,'spear'));
         this.game.physics.arcade.enable(this.spear);
         this.spear.anchor.setTo(.5);
 
+        /* Send player to Server */
+        this.sendPlayerData();
         //this.player.animations.add('rightWalk', [0]);
         //this.player.animations.add('leftWalk',[1]);
-
-        // =========Dealing with baddie=============
-        this.client.sendPlayer(this.player.x, this.player.y);
-        //this.client.testFunc();
-        //console.log(this.player.position);
 
         // =========Dealing with other players=========
         this.otherPlayers = this.add.group();
@@ -78,33 +76,41 @@ export default class Dungeon extends Phaser.State {
                 this.spear.angle = 90;
                 this.spear.x = (this.player.width/2);
                 this.spear.y = 0;
+                this.sendPlayerData()
             } else if ((angleInRad > .3926991) && (angleInRad <= 1.178097)) { // Attack bottom right
                 this.spear.angle = 135;
                 this.spear.x = this.player.width/2;
                 this.spear.y = this.player.height/2;
+                this.sendPlayerData()
             } else if ((angleInRad > 1.178097) && (angleInRad <= 1.9634954)) { // Attack Down
                 this.spear.angle = 180;
                 this.spear.x = 0;
                 this.spear.y = this.player.height/2;
+                this.sendPlayerData()
             } else if ((angleInRad > 1.9634954) && (angleInRad <= 2.7488936)) { // Attack Bottom left
                 this.spear.angle = 225;
                 this.spear.x = -this.player.width/2;
                 this.spear.y = this.player.height/2;
+                this.sendPlayerData()
             } else if ((angleInRad > 2.7488936) || (angleInRad <= -2.7488936)) { // Attack Left
                 this.spear.angle = 270;
                 this.spear.x = -this.player.width/2;
                 this.spear.y = 0;
+                this.sendPlayerData()
             } else if ((angleInRad > -2.7488936) && (angleInRad <= -1.9634954)) { // Attack Top Left
                 this.spear.angle = 315;
                 this.spear.x = -this.player.width/2;
                 this.spear.y = -this.player.height/2;
+                this.sendPlayerData()
             } else if ((angleInRad > -1.9634954) && (angleInRad <= -1.178097)) { // Attack Up
                 this.spear.x = 0;
                 this.spear.y = -this.player.height/2;
+                this.sendPlayerData()
             } else if ((angleInRad > -1.178097) && (angleInRad <= -0.3926991)) { // Attack top right
                 this.spear.angle = 45;
                 this.spear.x = this.player.width/2;
                 this.spear.y = -this.player.height/2;
+                this.sendPlayerData()
             }
 
             this.game.time.events.add(50, function(){
@@ -115,6 +121,7 @@ export default class Dungeon extends Phaser.State {
                 this.spear.angle = 0;
                 this.spear.x = 10;
                 this.spear.y = 0;
+                this.sendPlayerData()
             },this);
             //this.attack.destroy();
         }, this);
@@ -205,12 +212,19 @@ export default class Dungeon extends Phaser.State {
 
     // Function for creating player in otherPlayers
     createOtherPlayer(playerData) {
+        /* Give their position */
         let otherPlayer = this.add.sprite(playerData.xPos, playerData.yPos, 'player');
         otherPlayer.anchor.setTo(0.5);
         otherPlayer.scale.setTo(this.spriteScale);
+
+        /* Give em a spear */
+        let spear = otherPlayer.addChild(this.make.sprite(playerData.xPosSpear,playerData.yPosSpear,'spear'));
+        spear.angle = playerData.angleSpear;
+        spear.anchor.setTo(.5);
+
         otherPlayer.id = playerData.id;
         this.otherPlayers.add(otherPlayer);
-        console.log("created " + otherPlayer);
+        //console.log("created " + otherPlayer);
     }
 
     /**
@@ -251,5 +265,13 @@ export default class Dungeon extends Phaser.State {
                 this.createOtherPlayer(playerList[id]);
             }
         });
+    }
+
+    /**
+     * Sends all needed player information to server
+     * Since the otherPlayers are fully created every update this is paradigmatically appropriate
+     */
+    sendPlayerData() {
+        this.client.sendPlayer(this.player.x, this.player.y, this.spear.x, this.spear.y, this.spear.angle);
     }
 }
