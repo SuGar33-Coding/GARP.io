@@ -14,7 +14,7 @@ app.get('/', function (req, res) {
 });
 
 // Start listening
-server.listen(8081, function () {
+server.listen(8081, () => {
     server.clientUpdateRate = 1000 / 60; // Rate at which update packets are sent
     server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
@@ -27,9 +27,9 @@ var baddieDebug = false;
 
 /* The update package to be sent every update */
 var package = {
-    mapData: {},
+    mapData: {}, // TODO: Maybe use this
     players: {}, // List of all players in game
-    baddies: {}
+    baddies: {} // List of all enemies in game
 };
 
 var testBaddieId = uniqid('baddie-');
@@ -38,7 +38,7 @@ package.baddies[testBaddieId] = {
     xPos: 0,
     yPos: 0,
     health: 30,
-    instances: {}
+    instances: {} // List of clients that have received this baddie
 }
 console.log("Test baddie with id" + package.baddies[testBaddieId].id);
 
