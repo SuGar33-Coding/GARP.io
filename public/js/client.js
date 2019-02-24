@@ -8,8 +8,9 @@ export default class Client {
         this.socket.on('check', (data) => {
             console.log(data)
         });
-        this.socket.on('updatePlayers', (playerList) => {
-            this.state.refreshOtherPlayers(playerList);
+        this.socket.on('update', (updatePackage) => {
+            this.state.refreshOtherPlayers(updatePackage.players);
+            this.state.updateBaddies(updatePackage.baddies);
         });
     }
 

@@ -1,8 +1,9 @@
 
-var express = require('express');
-var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io').listen(server);
+const express = require('express');
+const app = express();
+const server = require('http').Server(app);
+const io = require('socket.io').listen(server);
+const uniqid = require('uniqid');
 
 // ===========Server Stuff=================
 // Request routing
@@ -22,8 +23,21 @@ server.listen(8081, function () {
 
 // ===========Websocket Stuff==============
 
-// list of all players in game
-var players = {};
+/* The update package to be sent every update */
+var package = {
+    mapData: {},
+    players: {}, // List of all players in game
+    baddies: {}
+};
+
+var testBaddieId = uniqid('baddie-');
+package.baddies[testBaddieId] = {
+    id: testBaddieId,
+    xPos: 0,
+    yPos: 0,
+    health: 30,
+    instances: {}
+}
 
 io.on('connection', (client) => {
     console.log("Connection with ID: " + client.id);
@@ -38,20 +52,20 @@ io.on('connection', (client) => {
             yPosSpear: playerData.yPosSpear,
             angleSpear: playerData.angleSpear
         }
-        players[client.id] = player;
+        package.players[client.id] = player;
         console.log("Player list: ");
-        console.log(players);
+        console.log(package.players);
     });
 
     client.on('playerMoved', (playerData) => {
         /* check for erroneous server restart with peristent client */
-        if (players[client.id]) { // If player does indeed exist on the current player list
-            players[client.id].xPos = playerData.xPos;
-            players[client.id].yPos = playerData.yPos;
+        if (package.players[client.id]) { // If player does indeed exist on the current player list
+            package.players[client.id].xPos = playerData.xPos;
+            package.players[client.id].yPos = playerData.yPos;
         } else { //TODO: Implement a way for the client to reconcile this too...
             //console.log("Player no longer exists on server, creating new server-side player instance");
             console.log("Player no longer exists on server...");
-            
+
             // this only adds the player on server side, the client doesn't recognize the new socket id's
             player = {
                 id: client.id,
@@ -61,14 +75,14 @@ io.on('connection', (client) => {
                 yPosSpear: playerData.yPosSpear,
                 angleSpear: playerData.angleSpear
             }
-            players[client.id] = player;
+            package.players[client.id] = player;
             console.log("Player list: ");
-            console.log(players);
+            console.log(package.players);
         }
     });
 
     client.on('enterDungeon', () => {
-        client.join("dungeon");
+        client.join("dungeon1");
     });
 
     client.on('test', (message) => {
@@ -76,15 +90,15 @@ io.on('connection', (client) => {
     });
 
     client.on('disconnect', () => {
-        delete players[client.id];
+        delete package.players[client.id];
         console.log("Disconnection and removal with ID: " + client.id);
         console.log("Player list: ");
-            console.log(players);
+        console.log(package.players);
     });
 });
 
 server.sendUpdate = function () {
-    io.to("dungeon").emit('updatePlayers', players);
+    io.to("dungeon1").emit('update', package);
 }
 
 server.setUpdateLoop = function () {

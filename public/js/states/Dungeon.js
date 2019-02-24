@@ -47,8 +47,12 @@ export default class Dungeon extends Phaser.State {
         //console.log(this.otherPlayers);
 
         // =========Dealing with baddie==============
-        var baddieStarts = this.findObjectsByType('enemy', this.map, 'objectLayer');
-        this.enemy = this.add.sprite(baddieStarts[0].x, baddieStarts[0].y, 'baddie');
+        this.baddies = this.add.group();
+
+        /* set spawn point */
+        this.baddieSpawnPoint = this.findObjectsByType('enemy', this.map, 'objectLayer');
+
+        this.enemy = this.add.sprite(this.baddieSpawnPoint[0].x, this.baddieSpawnPoint[0].y, 'baddie');
         this.enemy.anchor.setTo(.5);
         this.enemy.health = 30;
 
@@ -273,5 +277,25 @@ export default class Dungeon extends Phaser.State {
      */
     sendPlayerData() {
         this.client.sendPlayer(this.player.x, this.player.y, this.spear.x, this.spear.y, this.spear.angle);
+    }
+
+    updateBaddies(baddiesList) {
+        /* Checks if client-side baddie exists on the server */
+        this.baddies.forEach(baddie => { // If it does, update its params
+            if(baddiesList[baddie.id]) {
+                baddie.x = this.baddieSpawnPoint[0].x + baddiesList[baddie.id].xPos;
+                baddie.y = this.baddieSpawnPoint[0].y + baddiesList[baddie.id].yPos;
+                baddie.health(baddiesList[baddie.id].health);
+            } else { // Otherwise, kill it
+                baddie.kill();
+                baddie.destroy();
+                baddies.remove(baddie);
+            }
+        });
+        Object.keys(baddiesList).forEach(id => {
+            if(id.instances[this.client.socket.id]) {
+                
+            }
+        });
     }
 }
