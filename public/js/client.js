@@ -25,6 +25,16 @@ export default class Client {
         this.socket.emit('addPlayerToServer', playerData);
     }
 
+    sendBaddieData(id, x, y, health) {
+        let baddieData = {
+            id: id,
+            xPos: x,
+            yPos: y,
+            health: health
+        }
+        this.socket.emit('updateBaddie', baddieData);
+    }
+
     testFunc() {
         this.socket.emit('test', "Test Went Thru");
     }
@@ -35,5 +45,9 @@ export default class Client {
 
     playerMoved(playerData) {
         this.socket.emit('playerMoved', playerData);
+    }
+
+    receivedBaddie(baddieData) {
+        this.socket.emit('receivedBaddie', baddieData);
     }
 };

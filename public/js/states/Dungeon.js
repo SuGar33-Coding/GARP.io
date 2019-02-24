@@ -6,7 +6,7 @@ export default class Dungeon extends Phaser.State {
         this.spriteScale = 2;
         this.client = new Client(this);
     }
-    
+
     create() {
         // ======Setting up the map=============
 
@@ -33,7 +33,7 @@ export default class Dungeon extends Phaser.State {
         this.player.body.collideWorldBounds = true;
 
         /* Teh SP34R */
-        this.spear = this.player.addChild(this.make.sprite(10,0,'spear'));
+        this.spear = this.player.addChild(this.make.sprite(10, 0, 'spear'));
         this.game.physics.arcade.enable(this.spear);
         this.spear.anchor.setTo(.5);
 
@@ -52,14 +52,14 @@ export default class Dungeon extends Phaser.State {
         /* set spawn point */
         this.baddieSpawnPoint = this.findObjectsByType('enemy', this.map, 'objectLayer');
 
-        this.enemy = this.add.sprite(this.baddieSpawnPoint[0].x, this.baddieSpawnPoint[0].y, 'baddie');
-        this.enemy.anchor.setTo(.5);
-        this.enemy.health = 30;
+        //this.enemy = this.add.sprite(this.baddieSpawnPoint[0].x, this.baddieSpawnPoint[0].y, 'baddie');
+        //this.enemy.anchor.setTo(.5);
+        //this.enemy.health = 30;
 
-        this.actors = this.game.add.group();
+        //this.actors = this.game.add.group();
         this.game.physics.arcade.enable(this.player);
-        this.actors.add(this.enemy);
-        this.game.physics.arcade.enable(this.actors);
+        //this.actors.add(this.enemy);
+        //this.game.physics.arcade.enable(this.actors);
 
         this.game.camera.follow(this.player);
 
@@ -78,55 +78,55 @@ export default class Dungeon extends Phaser.State {
 
             if ((angleInRad >= -0.3926991) && (angleInRad <= 0.3926991)) { // Attack to the right
                 this.spear.angle = 90;
-                this.spear.x = (this.player.width/2);
+                this.spear.x = (this.player.width / 2);
                 this.spear.y = 0;
                 this.sendPlayerData()
             } else if ((angleInRad > .3926991) && (angleInRad <= 1.178097)) { // Attack bottom right
                 this.spear.angle = 135;
-                this.spear.x = this.player.width/2;
-                this.spear.y = this.player.height/2;
+                this.spear.x = this.player.width / 2;
+                this.spear.y = this.player.height / 2;
                 this.sendPlayerData()
             } else if ((angleInRad > 1.178097) && (angleInRad <= 1.9634954)) { // Attack Down
                 this.spear.angle = 180;
                 this.spear.x = 0;
-                this.spear.y = this.player.height/2;
+                this.spear.y = this.player.height / 2;
                 this.sendPlayerData()
             } else if ((angleInRad > 1.9634954) && (angleInRad <= 2.7488936)) { // Attack Bottom left
                 this.spear.angle = 225;
-                this.spear.x = -this.player.width/2;
-                this.spear.y = this.player.height/2;
+                this.spear.x = -this.player.width / 2;
+                this.spear.y = this.player.height / 2;
                 this.sendPlayerData()
             } else if ((angleInRad > 2.7488936) || (angleInRad <= -2.7488936)) { // Attack Left
                 this.spear.angle = 270;
-                this.spear.x = -this.player.width/2;
+                this.spear.x = -this.player.width / 2;
                 this.spear.y = 0;
                 this.sendPlayerData()
             } else if ((angleInRad > -2.7488936) && (angleInRad <= -1.9634954)) { // Attack Top Left
                 this.spear.angle = 315;
-                this.spear.x = -this.player.width/2;
-                this.spear.y = -this.player.height/2;
+                this.spear.x = -this.player.width / 2;
+                this.spear.y = -this.player.height / 2;
                 this.sendPlayerData()
             } else if ((angleInRad > -1.9634954) && (angleInRad <= -1.178097)) { // Attack Up
                 this.spear.x = 0;
-                this.spear.y = -this.player.height/2;
+                this.spear.y = -this.player.height / 2;
                 this.sendPlayerData()
             } else if ((angleInRad > -1.178097) && (angleInRad <= -0.3926991)) { // Attack top right
                 this.spear.angle = 45;
-                this.spear.x = this.player.width/2;
-                this.spear.y = -this.player.height/2;
+                this.spear.x = this.player.width / 2;
+                this.spear.y = -this.player.height / 2;
                 this.sendPlayerData()
             }
 
-            this.game.time.events.add(50, function(){
-                this.game.physics.arcade.overlap(this.spear, this.actors, this.damage, null, this);
-            },this);
-            
-            this.game.time.events.add(300, function(){
+            this.game.time.events.add(50, function () {
+                this.game.physics.arcade.overlap(this.spear, this.baddies, this.damage, null, this);
+            }, this);
+
+            this.game.time.events.add(300, function () {
                 this.spear.angle = 0;
                 this.spear.x = 10;
                 this.spear.y = 0;
                 this.sendPlayerData()
-            },this);
+            }, this);
             //this.attack.destroy();
         }, this);
 
@@ -151,9 +151,9 @@ export default class Dungeon extends Phaser.State {
     update() {
         // Collision
         this.game.physics.arcade.collide(this.player, this.wallLayer);
-        this.game.physics.arcade.collide(this.actors, this.wallLayer);
-        this.game.physics.arcade.collide(this.actors, this.actors);
-        this.game.physics.arcade.collide(this.player, this.actors);
+        this.game.physics.arcade.collide(this.baddies, this.wallLayer);
+        //this.game.physics.arcade.collide(this.actors, this.actors);
+        this.game.physics.arcade.collide(this.player, this.baddies);
         this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
 
         var speed = 120;
@@ -174,17 +174,24 @@ export default class Dungeon extends Phaser.State {
             //this.player.animations.play('rightWalk');
         }
 
-        if (this.enemy.health < 1) {
-            this.enemy.destroy();
-        }
+        /*
+        this.baddies.forEach(baddie => {
+            if (baddie.health <1) {
+                baddie.kill;
+                baddie.destroy;
+                baddies.remove(baddie);
+            };
+        }); */
 
         if (this.player.positon !== this.player.previousPosition) {
-            this.client.playerMoved({xPos: this.player.x, yPos: this.player.y});
+            this.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
         }
     }
 
     damage(weapon, attacked) {
         attacked.health -= 10;
+        this.sendBaddieData(attacked);
+        console.log(attacked.id + ": " + attacked.health);
     }
 
     collect(player, chest) {
@@ -214,7 +221,10 @@ export default class Dungeon extends Phaser.State {
         }
     }
 
-    // Function for creating player in otherPlayers
+    /**
+     * Creates a client-side sprite of another player that's on the same server
+     * @param {*} playerData 
+     */
     createOtherPlayer(playerData) {
         /* Give their position */
         let otherPlayer = this.add.sprite(playerData.xPos, playerData.yPos, 'player');
@@ -222,13 +232,26 @@ export default class Dungeon extends Phaser.State {
         otherPlayer.scale.setTo(this.spriteScale);
 
         /* Give em a spear */
-        let spear = otherPlayer.addChild(this.make.sprite(playerData.xPosSpear,playerData.yPosSpear,'spear'));
+        let spear = otherPlayer.addChild(this.make.sprite(playerData.xPosSpear, playerData.yPosSpear, 'spear'));
         spear.angle = playerData.angleSpear;
         spear.anchor.setTo(.5);
 
         otherPlayer.id = playerData.id;
         this.otherPlayers.add(otherPlayer);
         //console.log("created " + otherPlayer);
+    }
+
+    /**
+     * Creates a client-side baddie
+     * @param {*} baddieData JSON sent from the server containing all necessary baddie data
+     */
+    createBaddie(baddieData) {
+        let baddie = this.add.sprite(this.baddieSpawnPoint[0].x + baddieData.xPos, this.baddieSpawnPoint[0].y + baddieData.yPos, 'baddie');
+        baddie.anchor.setTo(.5);
+        baddie.health = baddieData.health;
+        baddie.id = baddieData.id;
+        this.baddies.add(baddie);
+        this.game.physics.arcade.enable(this.baddies);
     }
 
     /**
@@ -279,22 +302,43 @@ export default class Dungeon extends Phaser.State {
         this.client.sendPlayer(this.player.x, this.player.y, this.spear.x, this.spear.y, this.spear.angle);
     }
 
+    /**
+     * Sends all baddie params for one client-side baddie to server
+     * NOT paradigmatically apprpriate, but eh
+     * @param {*} baddie 
+     */
+    sendBaddieData(baddie) {
+        this.client.sendBaddieData(baddie.id, baddie.x - this.baddieSpawnPoint[0].x, baddie.y - this.baddieSpawnPoint[0].y, baddie.health);
+    }
+
+    /**
+     * Updates existing client-side baddies and adds new ones
+     * @param {*} baddiesList 
+     */
     updateBaddies(baddiesList) {
-        /* Checks if client-side baddie exists on the server */
+        /* Checks if client-side baddie exists on the server, if not, kill it */
         this.baddies.forEach(baddie => { // If it does, update its params
-            if(baddiesList[baddie.id]) {
+            if (baddiesList[baddie.id]) {
                 baddie.x = this.baddieSpawnPoint[0].x + baddiesList[baddie.id].xPos;
                 baddie.y = this.baddieSpawnPoint[0].y + baddiesList[baddie.id].yPos;
-                baddie.health(baddiesList[baddie.id].health);
-            } else { // Otherwise, kill it
+                baddie.health = baddiesList[baddie.id].health;
+                //console.log(baddie.x + ' ' + baddie.y + ' ' + baddie.health);
+            } else {
                 baddie.kill();
                 baddie.destroy();
-                baddies.remove(baddie);
+                this.baddies.remove(baddie);
             }
         });
+        /* Checks if global server-side baddie is on client yet, if not, add it */
         Object.keys(baddiesList).forEach(id => {
-            if(id.instances[this.client.socket.id]) {
-                
+            //console.log(id.instances);
+            //console.log(this.client.socket.id);
+            if (baddiesList[id].instances[this.client.socket.id]) {
+                // It's in the client, and I'm scared of null being false
+                // TODO: Test !null
+            } else {
+                this.createBaddie(baddiesList[id]);
+                this.client.receivedBaddie(baddiesList[id]);
             }
         });
     }

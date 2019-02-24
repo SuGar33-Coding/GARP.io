@@ -22,6 +22,8 @@ server.listen(8081, function () {
 });
 
 // ===========Websocket Stuff==============
+var playerDebug = false;
+var baddieDebug = false;
 
 /* The update package to be sent every update */
 var package = {
@@ -38,6 +40,7 @@ package.baddies[testBaddieId] = {
     health: 30,
     instances: {}
 }
+console.log("Test baddie with id" + package.baddies[testBaddieId].id);
 
 io.on('connection', (client) => {
     console.log("Connection with ID: " + client.id);
@@ -53,8 +56,10 @@ io.on('connection', (client) => {
             angleSpear: playerData.angleSpear
         }
         package.players[client.id] = player;
-        console.log("Player list: ");
-        console.log(package.players);
+        if (playerDebug) {
+            console.log("Player list: ");
+            console.log(package.players);
+        };
     });
 
     client.on('playerMoved', (playerData) => {
@@ -76,8 +81,10 @@ io.on('connection', (client) => {
                 angleSpear: playerData.angleSpear
             }
             package.players[client.id] = player;
-            console.log("Player list: ");
-            console.log(package.players);
+            if (playerDebug) {
+                console.log("Player list: ");
+                console.log(package.players);
+            };
         }
     });
 
@@ -89,11 +96,34 @@ io.on('connection', (client) => {
         console.log(message);
     });
 
+    client.on('receivedBaddie', baddie => {
+        package.baddies[baddie.id].instances[client.id] = true;
+        if (baddieDebug) {
+            console.log(package.baddies[baddie.id]);
+        };
+    });
+
+    client.on('updateBaddie', baddie => {
+        if (baddie.health < 1) {
+            delete package.baddies[baddie.id];
+            console.log("Baddie " + baddie.id + " defeated");
+        } else {
+            package.baddies[baddie.id].xPos = baddie.xPos;
+            package.baddies[baddie.id].yPos = baddie.yPos;
+            package.baddies[baddie.id].health = baddie.health;
+        }
+        if (baddieDebug) {
+            console.log(package.baddies[baddie.id]);
+        }
+    });
+
     client.on('disconnect', () => {
         delete package.players[client.id];
-        console.log("Disconnection and removal with ID: " + client.id);
-        console.log("Player list: ");
-        console.log(package.players);
+        if (playerDebug) {
+            console.log("Disconnection and removal with ID: " + client.id);
+            console.log("Player list: ");
+            console.log(package.players);
+        }
     });
 });
 
