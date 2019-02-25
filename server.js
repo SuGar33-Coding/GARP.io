@@ -27,7 +27,7 @@ var baddieDebug = false;
 
 /* The update package to be sent every update */
 var package = {
-    mapData: {}, // TODO: Maybe use this
+    maps: {}, // TODO: Maybe use this
     players: {}, // List of all players in game
     baddies: {} // List of all enemies in game
 };
@@ -123,6 +123,18 @@ io.on('connection', (client) => {
             console.log("Disconnection and removal with ID: " + client.id);
             console.log("Player list: ");
             console.log(package.players);
+        }
+    });
+
+    client.on('instantiateDungeon', mapData => {
+        if (package.maps[mapData.name]) {
+
+        } else {
+            package.maps[mapData.name] = {
+                name: mapData.name,
+                baddieSpawnPoint: mapData.baddieSpawnPoint,
+                items: mapData.items
+            }
         }
     });
 });

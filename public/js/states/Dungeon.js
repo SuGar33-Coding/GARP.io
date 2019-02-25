@@ -60,7 +60,7 @@ export default class Dungeon extends Phaser.State {
 
         /* Group containing all bodies that collide with the world and eachother */
         this.actors = this.game.add.group();
-        
+
         this.actors.add(this.player);
         this.actors.add(this.baddies);
         this.actors.add(this.otherPlayers);
@@ -148,6 +148,7 @@ export default class Dungeon extends Phaser.State {
 
         var item;
         let result = this.findObjectsByType('item', this.map, 'objectLayer');
+        console.log(result);
         result.forEach(function (element) {
             this.createFromTiledObject(element, this.items);
         }, this);

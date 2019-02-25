@@ -25,6 +25,19 @@ export default class Preload extends Phaser.State {
     }
 
     create() {
+        /*
+        const socket =  io.connect();
+
+        let map = this.game.add.tilemap('dungeon');
+        map.addTilesetImage('DungeonSet', 'gameTiles');
+        let mapData = {
+            name: 'dungeon1',
+            baddieSpawnPoint: this.findObjectsByType('enemy', this.map, 'objectLayer'),
+            items: this.findObjectsByType('item', this.map, 'objectLayer')
+        }
+        socket.emit('insantiateDungeon', mapData);
+        */
+
         this.state.start('MainMenu');
     }
 };
