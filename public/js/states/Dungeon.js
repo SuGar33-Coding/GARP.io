@@ -42,7 +42,7 @@ export default class Dungeon extends Phaser.State {
         //this.player.animations.add('rightWalk', [0]);
         //this.player.animations.add('leftWalk',[1]);
 
-        // =========Dealing with other players=========
+        // =========Dealing with other players=======
         this.otherPlayers = this.add.group();
         //console.log(this.otherPlayers);
 
@@ -56,11 +56,16 @@ export default class Dungeon extends Phaser.State {
         //this.enemy.anchor.setTo(.5);
         //this.enemy.health = 30;
 
-        //this.actors = this.game.add.group();
-        this.game.physics.arcade.enable(this.player);
-        //this.actors.add(this.enemy);
-        //this.game.physics.arcade.enable(this.actors);
+        // =========Instantiating groups=============
 
+        /* Group containing all bodies that collide with the world and eachother */
+        this.actors = this.game.add.group();
+        
+        this.actors.add(this.player);
+        this.actors.add(this.baddies);
+        this.actors.add(this.otherPlayers);
+
+        // =========Misc=============================
         this.game.camera.follow(this.player);
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
@@ -150,10 +155,11 @@ export default class Dungeon extends Phaser.State {
 
     update() {
         // Collision
-        this.game.physics.arcade.collide(this.player, this.wallLayer);
-        this.game.physics.arcade.collide(this.baddies, this.wallLayer);
-        //this.game.physics.arcade.collide(this.actors, this.actors);
-        this.game.physics.arcade.collide(this.player, this.baddies);
+        //this.game.physics.arcade.collide(this.player, this.wallLayer);
+        //this.game.physics.arcade.collide(this.baddies, this.wallLayer);
+        //this.game.physics.arcade.collide(this.player, this.baddies);
+        this.game.physics.arcade.collide(this.actors, this.wallLayer);
+        this.game.physics.arcade.collide(this.actors, this.actors);
         this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
 
         var speed = 120;
@@ -174,7 +180,7 @@ export default class Dungeon extends Phaser.State {
             //this.player.animations.play('rightWalk');
         }
 
-        /*
+        /* Deprecated, this gets handled server-side
         this.baddies.forEach(baddie => {
             if (baddie.health <1) {
                 baddie.kill;
@@ -238,7 +244,7 @@ export default class Dungeon extends Phaser.State {
 
         otherPlayer.id = playerData.id;
         this.otherPlayers.add(otherPlayer);
-        //console.log("created " + otherPlayer);
+        this.game.physics.arcade.enable(this.otherPlayers);
     }
 
     /**
