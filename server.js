@@ -22,14 +22,17 @@ server.listen(8081, () => {
 });
 
 // ===========Websocket Stuff==============
+var serverDebug = false;
 var playerDebug = false;
 var baddieDebug = false;
+var itemsDebug = false;
 
 /* The update package to be sent every update */
 var package = {
     maps: {}, // TODO: Maybe use this
     players: {}, // List of all players in game
-    baddies: {} // List of all enemies in game
+    baddies: {}, // List of all enemies in game
+    items: {}
 };
 
 var testBaddieId = uniqid('baddie-');
@@ -40,11 +43,15 @@ package.baddies[testBaddieId] = {
     health: 30,
     instances: {} // List of clients that have received this baddie
 }
-console.log("Test baddie with id" + package.baddies[testBaddieId].id);
+if (baddieDebug) {
+    console.log("Test baddie with id" + package.baddies[testBaddieId].id);
+}
 
 io.on('connection', (client) => {
-    console.log("Connection with ID: " + client.id);
-    client.emit('check', ("Check yoself " + client.id));
+    if (serverDebug) {
+        console.log("Connection with ID: " + client.id);
+        client.emit('check', ("Check yoself " + client.id));
+    }
 
     client.on("addPlayerToServer", (playerData) => {
         player = {
@@ -117,23 +124,47 @@ io.on('connection', (client) => {
         }
     });
 
+    client.on('itemCollected', itemId => {
+        delete package.items[itemId];
+        if (itemsDebug) {
+            console.log(package.items);
+        }
+    });
+
     client.on('disconnect', () => {
         delete package.players[client.id];
-        if (playerDebug) {
+        if (serverDebug) {
             console.log("Disconnection and removal with ID: " + client.id);
+        }
+        if (playerDebug) {
             console.log("Player list: ");
             console.log(package.players);
         }
     });
 
-    client.on('instantiateDungeon', mapData => {
+    client.on('instantiateDungeon', (mapData, callback) => {
         if (package.maps[mapData.name]) {
-
+            callback("Dungeon exists");
         } else {
             package.maps[mapData.name] = {
                 name: mapData.name,
                 baddieSpawnPoint: mapData.baddieSpawnPoint,
-                items: mapData.items
+            }
+
+            mapData.itemsArray.forEach(item => {
+                let id = uniqid("item-");
+                package.items[id] = {
+                    id: id,
+                    xPos: item.xPos,
+                    yPos: item.yPos,
+                    properties: item.properties
+                };
+            });
+
+            callback("Dungeon instantiated");
+
+            if (itemsDebug) {
+                console.log(package.items);
             }
         }
     });

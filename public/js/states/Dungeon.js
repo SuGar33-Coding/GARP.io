@@ -60,10 +60,12 @@ export default class Dungeon extends Phaser.State {
 
         /* Group containing all bodies that collide with the world and eachother */
         this.actors = this.game.add.group();
-
         this.actors.add(this.player);
         this.actors.add(this.baddies);
         this.actors.add(this.otherPlayers);
+
+        this.items = this.game.add.group();
+        this.items.enableBody = true;
 
         // =========Misc=============================
         this.game.camera.follow(this.player);
@@ -136,7 +138,7 @@ export default class Dungeon extends Phaser.State {
         }, this);
 
 
-        this.createItems();
+        //this.createItems();
 
         // ============Start update loop==============
         this.client.enteredDungeon();
@@ -201,11 +203,18 @@ export default class Dungeon extends Phaser.State {
         console.log(attacked.id + ": " + attacked.health);
     }
 
-    collect(player, chest) {
-        chest.destroy();
+    collect(player, item) {
+        this.client.itemCollected(item.id);
+        item.destroy();
+        this.items.remove(item);
     }
 
-    // Returns an array of objects of type 'type' from specified layer
+    /**
+     * Returns an array of objects of type 'type' from specified layer
+     * @param {*} type 
+     * @param {*} map 
+     * @param {*} layer 
+     */
     findObjectsByType(type, map, layer) {
         var result = new Array();
         map.objects[layer].forEach(function (element) {
@@ -217,7 +226,12 @@ export default class Dungeon extends Phaser.State {
         return result;
     }
 
-    // Adds any properties added to the element in Tiled to its sprite
+    /**
+     * Adds any properties added to the element in Tiled to its sprite
+     * Used for generic item creation
+     * @param {*} element 
+     * @param {*} group 
+     */
     createFromTiledObject(element, group) {
         var sprite = group.create(element.x, element.y, 'chest');
 
@@ -347,6 +361,16 @@ export default class Dungeon extends Phaser.State {
                 this.createBaddie(baddiesList[id]);
                 this.client.receivedBaddie(baddiesList[id]);
             }
+        });
+    }
+
+    refreshItems(itemList) {
+        this.items.removeAll(true);
+        Object.keys(itemList).forEach(id => {
+            let itemData = itemList[id];
+            let item = this.items.create(itemData.xPos, itemData.yPos, 'chest');
+            item.id = id;
+            // TODO: Handle other types of items than just chests
         });
     }
 }

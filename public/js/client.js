@@ -11,6 +11,7 @@ export default class Client {
         this.socket.on('update', (updatePackage) => {
             this.state.refreshOtherPlayers(updatePackage.players);
             this.state.updateBaddies(updatePackage.baddies);
+            this.state.refreshItems(updatePackage.items);
         });
     }
 
@@ -49,5 +50,9 @@ export default class Client {
 
     receivedBaddie(baddieData) {
         this.socket.emit('receivedBaddie', baddieData);
+    }
+
+    itemCollected(itemId) {
+        this.socket.emit('itemCollected', itemId);
     }
 };
