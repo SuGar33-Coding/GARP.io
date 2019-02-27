@@ -42,7 +42,7 @@ export default class Preload extends Phaser.State {
 
         let mapData = {
             name: 'dungeon1',
-            baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer'),
+            baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer')[0],
             itemsArray: itemsArray
         }
         socket.emit('instantiateDungeon', mapData, (msg) => {

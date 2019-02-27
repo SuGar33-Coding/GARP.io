@@ -267,7 +267,7 @@ export default class Dungeon extends Phaser.State {
      * @param {*} baddieData JSON sent from the server containing all necessary baddie data
      */
     createBaddie(baddieData) {
-        let baddie = this.add.sprite(this.baddieSpawnPoint[0].x + baddieData.xPos, this.baddieSpawnPoint[0].y + baddieData.yPos, 'baddie');
+        let baddie = this.add.sprite(baddieData.xPos, baddieData.yPos, 'baddie');
         baddie.anchor.setTo(.5);
         baddie.health = baddieData.health;
         baddie.id = baddieData.id;
@@ -329,7 +329,7 @@ export default class Dungeon extends Phaser.State {
      * @param {*} baddie 
      */
     sendBaddieData(baddie) {
-        this.client.sendBaddieData(baddie.id, baddie.x - this.baddieSpawnPoint[0].x, baddie.y - this.baddieSpawnPoint[0].y, baddie.health);
+        this.client.sendBaddieData(baddie.id, baddie.x, baddie.y, baddie.health);
     }
 
     /**
@@ -340,8 +340,8 @@ export default class Dungeon extends Phaser.State {
         /* Checks if client-side baddie exists on the server, if not, kill it */
         this.baddies.forEach(baddie => { // If it does, update its params
             if (baddiesList[baddie.id]) {
-                baddie.x = this.baddieSpawnPoint[0].x + baddiesList[baddie.id].xPos;
-                baddie.y = this.baddieSpawnPoint[0].y + baddiesList[baddie.id].yPos;
+                baddie.x = baddiesList[baddie.id].xPos;
+                baddie.y = baddiesList[baddie.id].yPos;
                 baddie.health = baddiesList[baddie.id].health;
                 //console.log(baddie.x + ' ' + baddie.y + ' ' + baddie.health);
             } else {

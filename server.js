@@ -4,6 +4,7 @@ const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io').listen(server);
 const uniqid = require('uniqid');
+const setRandomizedInterval = require('randomized-interval');
 
 // ===========Server Stuff=================
 // Request routing
@@ -34,18 +35,6 @@ var package = {
     baddies: {}, // List of all enemies in game
     items: {}
 };
-
-var testBaddieId = uniqid('baddie-');
-package.baddies[testBaddieId] = {
-    id: testBaddieId,
-    xPos: 0,
-    yPos: 0,
-    health: 30,
-    instances: {} // List of clients that have received this baddie
-}
-if (baddieDebug) {
-    console.log("Test baddie with id" + package.baddies[testBaddieId].id);
-}
 
 io.on('connection', (client) => {
     if (serverDebug) {
@@ -113,7 +102,9 @@ io.on('connection', (client) => {
     client.on('updateBaddie', baddie => {
         if (baddie.health < 1) {
             delete package.baddies[baddie.id];
-            console.log("Baddie " + baddie.id + " defeated");
+            if (baddieDebug) {
+                console.log("Baddie " + baddie.id + " defeated");
+            }
         } else {
             package.baddies[baddie.id].xPos = baddie.xPos;
             package.baddies[baddie.id].yPos = baddie.yPos;
@@ -166,6 +157,33 @@ io.on('connection', (client) => {
             if (itemsDebug) {
                 console.log(package.items);
             }
+
+            var testBaddieId = uniqid('baddie-');
+            package.baddies[testBaddieId] = {
+                id: testBaddieId,
+                xPos: package.maps['dungeon1'].baddieSpawnPoint.x,
+                yPos: package.maps['dungeon1'].baddieSpawnPoint.y,
+                health: 30,
+                instances: {} // List of clients that have received this baddie
+            }
+
+            var generateRandomBaddies = () => {
+                var testBaddieId = uniqid('baddie-');
+                package.baddies[testBaddieId] = {
+                    id: testBaddieId,
+                    xPos: package.maps['dungeon1'].baddieSpawnPoint.x + Math.random() * 100,
+                    yPos: package.maps['dungeon1'].baddieSpawnPoint.y + Math.random() * 100,
+                    health: 30,
+                    instances: {}
+                }
+                if (baddieDebug) {
+                    console.log("Baddie " + package.baddies[testBaddieId].id + " spawned at: " 
+                        + package.baddies[testBaddieId].xPos 
+                        + ", " + package.baddies[testBaddieId].yPos);
+                }
+            };
+
+            const baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
         }
     });
 });
