@@ -33,7 +33,8 @@ var package = {
     maps: {}, // TODO: Maybe use this
     players: {}, // List of all players in game
     baddies: {}, // List of all enemies in game
-    items: {}
+    items: {},
+    score: 0
 };
 
 io.on('connection', (client) => {
@@ -102,10 +103,12 @@ io.on('connection', (client) => {
     client.on('updateBaddie', baddie => {
         if (baddie.health < 1) {
             delete package.baddies[baddie.id];
+            package.score ++;
             if (baddieDebug) {
                 console.log("Baddie " + baddie.id + " defeated");
             }
         } else {
+             //TODO: Fix the bug where a server restart with lingering clients crashes everything
             package.baddies[baddie.id].xPos = baddie.xPos;
             package.baddies[baddie.id].yPos = baddie.yPos;
             package.baddies[baddie.id].health = baddie.health;

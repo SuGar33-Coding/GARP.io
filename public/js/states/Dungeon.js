@@ -140,6 +140,19 @@ export default class Dungeon extends Phaser.State {
 
         //this.createItems();
 
+
+        /* NONE OF THIS WORKS
+        this.score = this.add.text(200, 200, "Score: 0", {
+        });
+
+        this.PLEASEWORK = this.add.group();
+        this.PLEASEWORK = (this.score);
+
+        this.world.bringToTop(this.PLEASEWORK);
+
+        console.log(this.score);
+        */
+
         // ============Start update loop==============
         this.client.enteredDungeon();
     }
@@ -372,5 +385,9 @@ export default class Dungeon extends Phaser.State {
             item.id = id;
             // TODO: Handle other types of items than just chests
         });
+    }
+
+    updateScore(score) {
+        this.score.setText("Score: " + score);
     }
 }

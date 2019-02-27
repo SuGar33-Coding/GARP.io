@@ -12,6 +12,7 @@ export default class Client {
             this.state.refreshOtherPlayers(updatePackage.players);
             this.state.updateBaddies(updatePackage.baddies);
             this.state.refreshItems(updatePackage.items);
+            //this.state.updateScore(updatePackage.score);
         });
     }
 
