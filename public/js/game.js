@@ -5,7 +5,7 @@ import Dungeon from './states/Dungeon.js';
 
 class Game extends Phaser.Game {
     constructor() {
-        super(window.innerWidth, window.innerHeight, Phaser.AUTO, '')
+        super(window.innerWidth, window.innerHeight, Phaser.AUTO, 'phaser-canvas');
         /* super from the tutorial I used */
         //super(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.AUTO);
         this.state.add('Boot', Boot, false);

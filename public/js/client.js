@@ -12,7 +12,7 @@ export default class Client {
             this.state.refreshOtherPlayers(updatePackage.players);
             this.state.updateBaddies(updatePackage.baddies);
             this.state.refreshItems(updatePackage.items);
-            //this.state.updateScore(updatePackage.score);
+            this.state.updateScore(updatePackage.score);
         });
     }
 
@@ -55,5 +55,11 @@ export default class Client {
 
     itemCollected(itemId) {
         this.socket.emit('itemCollected', itemId);
+    }
+
+    tryCreateDungeon(mapData) {
+        this.socket.emit('instantiateDungeon', mapData, (msg) => {
+            console.log(msg);
+        });
     }
 };

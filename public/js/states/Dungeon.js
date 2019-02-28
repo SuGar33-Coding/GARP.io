@@ -9,6 +9,7 @@ export default class Dungeon extends Phaser.State {
 
     create() {
         // ======Setting up the map=============
+        this.tryCreateDungeon(); // If first player to join, this instatntiates the dungeon
 
         this.map = this.game.add.tilemap('dungeon');
 
@@ -140,18 +141,19 @@ export default class Dungeon extends Phaser.State {
 
         //this.createItems();
 
-
-        /* NONE OF THIS WORKS
-        this.score = this.add.text(200, 200, "Score: 0", {
+        this.score = this.add.text(0, 0, "Score: 0", {
+            fill: "#ffffff"
         });
 
-        this.PLEASEWORK = this.add.group();
-        this.PLEASEWORK = (this.score);
+        this.score.fixedToCamera = true;
+        this.score.cameraOffset.setTo(20, 20);
 
-        this.world.bringToTop(this.PLEASEWORK);
+        //this.PLEASEWORK = this.add.group();
+        //this.PLEASEWORK = (this.score);
+
+        //this.world.bringToTop(this.PLEASEWORK);
 
         console.log(this.score);
-        */
 
         // ============Start update loop==============
         this.client.enteredDungeon();
@@ -220,6 +222,8 @@ export default class Dungeon extends Phaser.State {
         this.client.itemCollected(item.id);
         item.destroy();
         this.items.remove(item);
+
+
     }
 
     /**
@@ -389,5 +393,35 @@ export default class Dungeon extends Phaser.State {
 
     updateScore(score) {
         this.score.setText("Score: " + score);
+    }
+
+    tryCreateDungeon() {
+        let map = this.game.add.tilemap('dungeon');
+        map.addTilesetImage('DungeonSet', 'gameTiles');
+
+        let itemsArray = []
+
+        this.findObjectsByType('item', map, 'objectLayer').forEach(itemData => {
+            itemsArray.push({
+                xPos: itemData.x,
+                yPos: itemData.y,
+                properties: itemData.properties
+            })
+        });
+
+        let mapData = {
+            name: 'dungeon1',
+            baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer')[0],
+            itemsArray: itemsArray
+        }
+        
+        this.client.tryCreateDungeon(mapData);
+    }
+
+    /**
+     * For debug info
+     */
+    render() {
+        //this.game.debug.cameraInfo(this.camera, 32, 32);
     }
 }

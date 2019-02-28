@@ -30,7 +30,7 @@ var itemsDebug = false;
 
 /* The update package to be sent every update */
 var package = {
-    maps: {}, // TODO: Maybe use this
+    maps: {},
     players: {}, // List of all players in game
     baddies: {}, // List of all enemies in game
     items: {},
@@ -120,19 +120,10 @@ io.on('connection', (client) => {
 
     client.on('itemCollected', itemId => {
         delete package.items[itemId];
+        package.score ++;
+
         if (itemsDebug) {
             console.log(package.items);
-        }
-    });
-
-    client.on('disconnect', () => {
-        delete package.players[client.id];
-        if (serverDebug) {
-            console.log("Disconnection and removal with ID: " + client.id);
-        }
-        if (playerDebug) {
-            console.log("Player list: ");
-            console.log(package.players);
         }
     });
 
@@ -154,6 +145,8 @@ io.on('connection', (client) => {
                     properties: item.properties
                 };
             });
+
+            client.dungeonName = mapData.name;
 
             callback("Dungeon instantiated");
 
@@ -186,15 +179,43 @@ io.on('connection', (client) => {
                 }
             };
 
-            const baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
+            package.maps[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
+        }
+    });
+
+    client.on('disconnect', () => {
+        delete package.players[client.id];
+        if (Object.keys(package.players).length === 0 && package.players.constructor === Object) {
+            //console.log("got here");
+            server.closeDungeon('dungeon1');
+        } else {
+            
+        }
+
+        if (serverDebug) {
+            console.log("Disconnection and removal with ID: " + client.id);
+        }
+        if (playerDebug) {
+            console.log("Player list: ");
+            console.log(package.players);
         }
     });
 });
 
-server.sendUpdate = function () {
+server.sendUpdate = () => {
     io.to("dungeon1").emit('update', package);
-}
+};
 
-server.setUpdateLoop = function () {
+server.setUpdateLoop = () => {
     setInterval(server.sendUpdate, server.clientUpdateRate);
+};
+
+server.closeDungeon = (mapName) => {
+    package.maps[mapName].baddieInterval.clear();
+    delete package.maps[mapName];
+
+    // Eventually these will be properties of each map. For now, hax
+    package.items = {};
+    package.baddies = {};
+    package.score = 0;
 };

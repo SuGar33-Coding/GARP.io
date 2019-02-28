@@ -25,31 +25,6 @@ export default class Preload extends Phaser.State {
     }
 
     create() {
-        const socket =  io.connect();
-
-        let map = this.game.add.tilemap('dungeon');
-        map.addTilesetImage('DungeonSet', 'gameTiles');
-
-        let itemsArray = []
-
-        this.findObjectsByType('item', map, 'objectLayer').forEach(itemData => {
-            itemsArray.push({
-                xPos: itemData.x,
-                yPos: itemData.y,
-                properties: itemData.properties
-            })
-        });
-
-        let mapData = {
-            name: 'dungeon1',
-            baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer')[0],
-            itemsArray: itemsArray
-        }
-        socket.emit('instantiateDungeon', mapData, (msg) => {
-            console.log(msg);
-            socket.close();
-        });
-
         this.state.start('MainMenu');
     }
 
