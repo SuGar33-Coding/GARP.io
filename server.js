@@ -41,7 +41,7 @@ io.on('connection', (client) => {
     if (serverDebug) {
         console.log("Connection with ID: " + client.id);
         client.emit('check', ("Check yoself " + client.id));
-    }
+    };
 
     client.on("addPlayerToServer", (playerData) => {
         player = {
@@ -211,6 +211,8 @@ server.setUpdateLoop = () => {
 };
 
 server.closeDungeon = (mapName) => {
+    //TODO: Fix the bug where a server restart and subsequent stale client restart crashes the server
+    //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
     package.maps[mapName].baddieInterval.clear();
     delete package.maps[mapName];
 
