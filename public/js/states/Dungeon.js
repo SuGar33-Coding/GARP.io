@@ -219,11 +219,9 @@ export default class Dungeon extends Phaser.State {
     }
 
     collect(player, item) {
-        this.client.itemCollected(item.id);
         item.destroy();
         this.items.remove(item);
-
-
+        this.client.itemCollected(item.id);
     }
 
     /**
