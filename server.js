@@ -64,11 +64,10 @@ io.on('connection', (client) => {
         if (package.players[client.id]) { // If player does indeed exist on the current player list
             package.players[client.id].xPos = playerData.xPos;
             package.players[client.id].yPos = playerData.yPos;
-        } else { //TODO: Implement a way for the client to reconcile this too...
-            //console.log("Player no longer exists on server, creating new server-side player instance");
-            console.log("Player no longer exists on server...");
+        } else { //TODO: Implement a way for the client to reconcile this too... ~ As of now, clients cannot recconect ~
+            console.log("Player no longer exists on server, creating new server-side player instance");
 
-            // this only adds the player on server side, the client doesn't recognize the new socket id's
+            // this only adds the player on server side, the client doesn't recognize the new socket id's of other players
             player = {
                 id: client.id,
                 xPos: playerData.xPos,
@@ -108,7 +107,6 @@ io.on('connection', (client) => {
                 console.log("Baddie " + baddie.id + " defeated");
             }
         } else {
-             //TODO: Fix the bug where a server restart with lingering clients crashes everything
             package.baddies[baddie.id].xPos = baddie.xPos;
             package.baddies[baddie.id].yPos = baddie.yPos;
             package.baddies[baddie.id].health = baddie.health;
@@ -186,7 +184,6 @@ io.on('connection', (client) => {
     client.on('disconnect', () => {
         delete package.players[client.id];
         if (Object.keys(package.players).length === 0 && package.players.constructor === Object) {
-            //console.log("got here");
             server.closeDungeon('dungeon1');
         } else {
             
@@ -213,6 +210,7 @@ server.setUpdateLoop = () => {
 server.closeDungeon = (mapName) => {
     //TODO: Fix the bug where a server restart and subsequent stale client restart crashes the server
     //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
+    //Temp working fix: clients cannot recconect after initial connect
     package.maps[mapName].baddieInterval.clear();
     delete package.maps[mapName];
 

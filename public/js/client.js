@@ -1,9 +1,7 @@
-import Dungeon from './states/Dungeon.js'
-
 export default class Client {
     constructor(dungeonState) {
         this.state = dungeonState;
-        this.socket = io.connect();
+        this.socket = io.connect({reconnection: false});
 
         this.socket.on('check', (data) => {
             console.log(data)
