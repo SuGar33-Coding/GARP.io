@@ -5,11 +5,16 @@ export default class Dungeon extends Phaser.State {
         super();
         this.spriteScale = 2;
         this.client = new Client(this);
+        console.log("Dungeon constructor ran");
     }
 
     create() {
         // ======Setting up the map=============
         this.tryCreateDungeon(); // If first player to join, this instatntiates the dungeon
+
+        this.disconnectTimer = setTimeout(() => {
+            console.log("Well that escalated quickly");
+        }, 2000);
 
         this.map = this.game.add.tilemap('dungeon');
 
@@ -414,6 +419,13 @@ export default class Dungeon extends Phaser.State {
         }
         
         this.client.tryCreateDungeon(mapData);
+    }
+
+    resetDisconnectTimeout() {
+        clearTimeout(this.disconnectTimer);
+        this.disconnectTimer = setTimeout(() => {
+            this.state.start('MainMenu', true, true);
+        }, 2000);
     }
 
     /**

@@ -11,6 +11,7 @@ export default class Client {
             this.state.updateBaddies(updatePackage.baddies);
             this.state.refreshItems(updatePackage.items);
             this.state.updateScore(updatePackage.score);
+            this.state.resetDisconnectTimeout();
         });
     }
 
