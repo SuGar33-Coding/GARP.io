@@ -229,7 +229,10 @@ io.on('connection', (client) => {
     });
 
     client.on('disconnect', () => {
-        delete package.dungeons[dungeonName].players[client.id];
+        if (package.dungeons[dungeonName] && package.dungeons[dungeonName].players[client.id]) {
+            delete package.dungeons[dungeonName].players[client.id];
+        }
+
         /* This is for closing dungeons when all players have left
          * It's not being used right nao
         if (Object.keys(package.dungeons[dungeonName].players).length === 0 && package.dungeons[dungeonName].players.constructor === Object) {
