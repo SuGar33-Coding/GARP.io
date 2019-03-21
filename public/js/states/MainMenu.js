@@ -1,5 +1,3 @@
-import game from "../game.js"
-
 export default class MainMenu extends Phaser.State {
 
     create() {
@@ -31,14 +29,17 @@ export default class MainMenu extends Phaser.State {
      * Start game in the default dungeon
      */
     startGame() {
-        this.state.start('Dungeon');
+        let dungeonName = prompt("Dungeon to join", "default");
+
+        this.game.client.joinDungeon(dungeonName);
+        //this.state.start('Dungeon');
     }
 
     /**
      * Instantiate a dungeon on the server
      */
     createDungeon() {
-        let dungeonName = prompt("Dungeon name", "MySuperCoolFungeon");
+        let dungeonName = prompt("Dungeon to create", "default");
 
         let map = this.game.add.tilemap('dungeon');
         map.addTilesetImage('DungeonSet', 'gameTiles');
@@ -59,22 +60,22 @@ export default class MainMenu extends Phaser.State {
             itemsArray: itemsArray
         }
         
-        game.client.tryCreateDungeon(mapData);
+        this.game.client.tryCreateDungeon(mapData);
     }
 
     /**
      * Close dungeon on the server
      */
     deleteDungeon() {
-        let dungeonName = prompt("Dungeon to delete", "MySuperLameDumbgeon");
-        game.client.deleteDungeon(dungeonName);
+        let dungeonName = prompt("Dungeon to delete", "default");
+        this.game.client.deleteDungeon(dungeonName);
     }
 
     /**
      * Refresh text-list of instantiated dungeons on server
      */
     refreshRooms() {
-        game.client.reqServers(this);
+        this.game.client.reqServers(this);
     }
 
     /**

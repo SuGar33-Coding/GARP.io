@@ -1,7 +1,10 @@
+import game from "./game.js"
+
 export default class Client {
     constructor(dungeonState) {
         this.state = dungeonState;
         this.socket = io.connect({reconnection: false});
+        this.dungeonName = "d";
 
         this.socket.on('check', (data) => {
             console.log(data)
@@ -12,6 +15,17 @@ export default class Client {
             this.state.refreshItems(updatePackage.items);
             this.state.updateScore(updatePackage.score);
             this.state.resetDisconnectTimeout();
+        });
+    };
+
+    joinDungeon(name) {
+        this.socket.emit('joinDungeon', name, (enteredDungeon) => {
+            if (enteredDungeon) {
+                this.dungeonName = name;
+                game.state.start('Dungeon');
+            } else {
+                alert("Dungeon does not exist");
+            }
         });
     };
 
