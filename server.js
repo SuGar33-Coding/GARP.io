@@ -152,6 +152,7 @@ io.on('connection', (client) => {
                 console.log(package.items);
             }
 
+            // move all the updatepacket info to under the map and add player to map on entry
             var testBaddieId = uniqid('baddie-');
             package.baddies[testBaddieId] = {
                 id: testBaddieId,

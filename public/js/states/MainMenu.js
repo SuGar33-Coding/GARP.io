@@ -27,11 +27,19 @@ export default class MainMenu extends Phaser.State {
 
     }
 
+    /**
+     * Start game in the default dungeon
+     */
     startGame() {
         this.state.start('Dungeon');
     }
 
+    /**
+     * Instantiate a dungeon on the server
+     */
     createDungeon() {
+        let dungeonName = prompt("Dungeon name", "MySuperCoolFungeon");
+
         let map = this.game.add.tilemap('dungeon');
         map.addTilesetImage('DungeonSet', 'gameTiles');
 
@@ -46,7 +54,7 @@ export default class MainMenu extends Phaser.State {
         });
 
         let mapData = {
-            name: 'dungeon1',
+            name: dungeonName,
             baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer')[0],
             itemsArray: itemsArray
         }
@@ -54,10 +62,17 @@ export default class MainMenu extends Phaser.State {
         game.client.tryCreateDungeon(mapData);
     }
 
+    /**
+     * Close dungeon on the server
+     */
     deleteDungeon() {
-        game.client.deleteDungeon('dungeon1');
+        let dungeonName = prompt("Dungeon to delete", "MySuperLameDumbgeon");
+        game.client.deleteDungeon(dungeonName);
     }
 
+    /**
+     * Refresh text-list of instantiated dungeons on server
+     */
     refreshRooms() {
         game.client.reqServers(this);
     }
