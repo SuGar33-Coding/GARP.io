@@ -30,7 +30,7 @@ var itemsDebug = false;
 
 /* The update package to be sent every update */
 var package = {
-    dungeons: {},
+    "dungeons": {},
     players: {}, // List of all players in game
     baddies: {}, // List of all enemies in game
     items: {},
@@ -181,6 +181,17 @@ io.on('connection', (client) => {
         }
     });
 
+    client.on('reqServers', (nothin, callback) => {
+        console.log(package);
+        if (package.dungeons) {
+            console.log("Sending: " + Object.keys(package.dungeons));
+            callback(Object.keys(package.dungeons));
+        } else {
+            callback("No servers available");
+        }
+
+    });
+
     client.on('closeDungeon', (mapName, callback) => {
         //TODO: Fix the bug where a server restart and subsequent stale client restart crashes the server
         //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
@@ -198,7 +209,7 @@ io.on('connection', (client) => {
         } else {
             callback("No such dungeon exists");
         }
-        
+
     });
 
     client.on('disconnect', () => {

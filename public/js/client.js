@@ -67,4 +67,10 @@ export default class Client {
             console.log(msg);
         });
     };
+
+    reqServers(self) {
+        this.socket.emit('reqServers', "", (list) => {
+            self.serverList.setText("Servers: " + list);
+        });
+    };
 };

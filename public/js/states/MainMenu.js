@@ -8,6 +8,10 @@ export default class MainMenu extends Phaser.State {
         this.title.anchor.setTo(0.5);
         this.title.scale.setTo(2);
 
+        this.serverList = this.add.text(0, 0, "Servers:", {
+            fill: "#ffffff"
+        });
+
         let playButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY, 'playButton', this.startGame, this, 2, 1, 0);
         playButton.anchor.setTo(0.5);
 
@@ -17,6 +21,9 @@ export default class MainMenu extends Phaser.State {
         /* The server crashes if you click this button when someone else is playing so uh. Don't. :) */
         let deleteDungeonButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY+200, 'playButton', this.deleteDungeon, this, 2, 1, 0);
         deleteDungeonButton.anchor.setTo(0.5);
+
+        let refreshRoomsButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY+300, 'playButton', this.refreshRooms, this, 2, 1, 0);
+        refreshRoomsButton.anchor.setTo(0.5);
 
     }
 
@@ -49,6 +56,10 @@ export default class MainMenu extends Phaser.State {
 
     deleteDungeon() {
         game.client.deleteDungeon('dungeon1');
+    }
+
+    refreshRooms() {
+        game.client.reqServers(this);
     }
 
     /**
