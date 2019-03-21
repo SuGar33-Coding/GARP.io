@@ -193,9 +193,11 @@ io.on('connection', (client) => {
     });
 
     client.on('closeDungeon', (mapName, callback) => {
-        //TODO: Fix the bug where a server restart and subsequent stale client restart crashes the server
+        //Fix the bug where a server restart and subsequent stale client restart crashes the server
         //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
         //Temp working fix: clients cannot recconect after initial connect
+        //Long-term apparently working fix: Check if map exists before closing
+        //TODO: but now that means that players dont get kicked if a map closes, so need a way to reconcile that
 
         if (package.dungeons[mapName]) {
             package.dungeons[mapName].baddieInterval.clear();
