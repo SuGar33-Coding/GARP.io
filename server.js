@@ -24,13 +24,13 @@ server.listen(8081, () => {
 
 // ===========Websocket Stuff==============
 var serverDebug = false;
-var playerDebug = false;
+var playerDebug = true;
 var baddieDebug = false;
 var itemsDebug = false;
 
 /* The update package to be sent every update */
 var package = {
-    maps: {},
+    dungeons: {},
     players: {}, // List of all players in game
     baddies: {}, // List of all enemies in game
     items: {},
@@ -102,7 +102,7 @@ io.on('connection', (client) => {
     client.on('updateBaddie', baddie => {
         if (baddie.health < 1) {
             delete package.baddies[baddie.id];
-            package.score ++;
+            package.score++;
             if (baddieDebug) {
                 console.log("Baddie " + baddie.id + " defeated");
             }
@@ -118,7 +118,7 @@ io.on('connection', (client) => {
 
     client.on('itemCollected', itemId => {
         delete package.items[itemId];
-        package.score ++;
+        package.score++;
 
         if (itemsDebug) {
             console.log(package.items);
@@ -126,10 +126,10 @@ io.on('connection', (client) => {
     });
 
     client.on('instantiateDungeon', (mapData, callback) => {
-        if (package.maps[mapData.name]) {
+        if (package.dungeons[mapData.name]) {
             callback("Dungeon exists");
         } else {
-            package.maps[mapData.name] = {
+            package.dungeons[mapData.name] = {
                 name: mapData.name,
                 baddieSpawnPoint: mapData.baddieSpawnPoint,
             }
@@ -155,8 +155,8 @@ io.on('connection', (client) => {
             var testBaddieId = uniqid('baddie-');
             package.baddies[testBaddieId] = {
                 id: testBaddieId,
-                xPos: package.maps['dungeon1'].baddieSpawnPoint.x,
-                yPos: package.maps['dungeon1'].baddieSpawnPoint.y,
+                xPos: package.dungeons['dungeon1'].baddieSpawnPoint.x,
+                yPos: package.dungeons['dungeon1'].baddieSpawnPoint.y,
                 health: 30,
                 instances: {} // List of clients that have received this baddie
             }
@@ -165,29 +165,52 @@ io.on('connection', (client) => {
                 var testBaddieId = uniqid('baddie-');
                 package.baddies[testBaddieId] = {
                     id: testBaddieId,
-                    xPos: package.maps['dungeon1'].baddieSpawnPoint.x + Math.random() * 100,
-                    yPos: package.maps['dungeon1'].baddieSpawnPoint.y + Math.random() * 100,
+                    xPos: package.dungeons['dungeon1'].baddieSpawnPoint.x + Math.random() * 100,
+                    yPos: package.dungeons['dungeon1'].baddieSpawnPoint.y + Math.random() * 100,
                     health: 30,
                     instances: {}
                 }
                 if (baddieDebug) {
-                    console.log("Baddie " + package.baddies[testBaddieId].id + " spawned at: " 
-                        + package.baddies[testBaddieId].xPos 
+                    console.log("Baddie " + package.baddies[testBaddieId].id + " spawned at: "
+                        + package.baddies[testBaddieId].xPos
                         + ", " + package.baddies[testBaddieId].yPos);
                 }
             };
 
-            package.maps[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
+            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
         }
+    });
+
+    client.on('closeDungeon', (mapName, callback) => {
+        //TODO: Fix the bug where a server restart and subsequent stale client restart crashes the server
+        //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
+        //Temp working fix: clients cannot recconect after initial connect
+
+        if (package.dungeons[mapName]) {
+            package.dungeons[mapName].baddieInterval.clear();
+            delete package.dungeons[mapName];
+
+            // Eventually these will be properties of each map. For now, hax
+            package.items = {};
+            package.baddies = {};
+            package.score = 0;
+            callback("Dungeon: " + mapName + " closed");
+        } else {
+            callback("No such dungeon exists");
+        }
+        
     });
 
     client.on('disconnect', () => {
         delete package.players[client.id];
+        /* This is for closing dungeons when all players have left
+         * It's not being used right nao
         if (Object.keys(package.players).length === 0 && package.players.constructor === Object) {
-            server.closeDungeon('dungeon1');
+            
         } else {
             
         }
+        */
 
         if (serverDebug) {
             console.log("Disconnection and removal with ID: " + client.id);
@@ -205,17 +228,4 @@ server.sendUpdate = () => {
 
 server.setUpdateLoop = () => {
     setInterval(server.sendUpdate, server.clientUpdateRate);
-};
-
-server.closeDungeon = (mapName) => {
-    //TODO: Fix the bug where a server restart and subsequent stale client restart crashes the server
-    //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
-    //Temp working fix: clients cannot recconect after initial connect
-    package.maps[mapName].baddieInterval.clear();
-    delete package.maps[mapName];
-
-    // Eventually these will be properties of each map. For now, hax
-    package.items = {};
-    package.baddies = {};
-    package.score = 0;
 };

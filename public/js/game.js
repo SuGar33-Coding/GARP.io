@@ -9,12 +9,16 @@ class Game extends Phaser.Game {
         /* super from the tutorial I used */
         //super(window.innerWidth * window.devicePixelRatio, window.innerHeight * window.devicePixelRatio, Phaser.AUTO);
         this.state.add('Boot', Boot, false);
-        //uncomment these as we create them through the tutorial
         this.state.add('Preload', Preload), false;
         this.state.add('MainMenu', MainMenu, false);
         this.state.add('Dungeon', Dungeon, false);
     }
 }
+
+/* For storing the client */
+export default {
+
+};
 
 const game = new Game();
 

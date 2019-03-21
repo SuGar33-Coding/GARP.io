@@ -1,16 +1,17 @@
 import Client from '../client.js'
+import game from "../game.js"
 
 export default class Dungeon extends Phaser.State {
     constructor() {
         super();
         this.spriteScale = 2;
-        this.client = new Client(this);
+        game.client = new Client(this);
         console.log("Dungeon constructor ran");
     }
 
     create() {
         // ======Setting up the map=============
-        this.tryCreateDungeon(); // If first player to join, this instatntiates the dungeon
+        //this.tryCreateDungeon(); // If first player to join, this instatntiates the dungeon
 
         this.disconnectTimer = setTimeout(() => {
             console.log("Well that escalated quickly");
@@ -161,7 +162,7 @@ export default class Dungeon extends Phaser.State {
         console.log(this.score);
 
         // ============Start update loop==============
-        this.client.enteredDungeon();
+        game.client.enteredDungeon();
     }
 
     createItems() {
@@ -213,7 +214,7 @@ export default class Dungeon extends Phaser.State {
         }); */
 
         if (this.player.positon !== this.player.previousPosition) {
-            this.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
+            game.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
         }
     }
 
@@ -226,7 +227,7 @@ export default class Dungeon extends Phaser.State {
     collect(player, item) {
         item.destroy();
         this.items.remove(item);
-        this.client.itemCollected(item.id);
+        game.client.itemCollected(item.id);
     }
 
     /**
@@ -304,7 +305,7 @@ export default class Dungeon extends Phaser.State {
      */
     updateOtherPlayers(playerList) {
         Object.keys(playerList).forEach(id => {
-            if (id !== this.client.socket.id) {
+            if (id !== game.client.socket.id) {
                 let indexedPlayer = null;
                 this.otherPlayers.forEach(otherPlayer => {
                     if (id === otherPlayer.id) {
@@ -329,7 +330,7 @@ export default class Dungeon extends Phaser.State {
     refreshOtherPlayers(playerList) {
         this.otherPlayers.removeAll(true);
         Object.keys(playerList).forEach(id => {
-            if (id !== this.client.socket.id) {
+            if (id !== game.client.socket.id) {
                 this.createOtherPlayer(playerList[id]);
             }
         });
@@ -340,7 +341,7 @@ export default class Dungeon extends Phaser.State {
      * Since the otherPlayers are fully created every update this is paradigmatically appropriate
      */
     sendPlayerData() {
-        this.client.sendPlayer(this.player.x, this.player.y, this.spear.x, this.spear.y, this.spear.angle);
+        game.client.sendPlayer(this.player.x, this.player.y, this.spear.x, this.spear.y, this.spear.angle);
     }
 
     /**
@@ -349,7 +350,7 @@ export default class Dungeon extends Phaser.State {
      * @param {*} baddie 
      */
     sendBaddieData(baddie) {
-        this.client.sendBaddieData(baddie.id, baddie.x, baddie.y, baddie.health);
+        game.client.sendBaddieData(baddie.id, baddie.x, baddie.y, baddie.health);
     }
 
     /**
@@ -373,13 +374,13 @@ export default class Dungeon extends Phaser.State {
         /* Checks if global server-side baddie is on client yet, if not, add it */
         Object.keys(baddiesList).forEach(id => {
             //console.log(id.instances);
-            //console.log(this.client.socket.id);
-            if (baddiesList[id].instances[this.client.socket.id]) {
+            //console.log(game.client.socket.id);
+            if (baddiesList[id].instances[game.client.socket.id]) {
                 // It's in the client, and I'm scared of null being false
                 // TODO: Test !null
             } else {
                 this.createBaddie(baddiesList[id]);
-                this.client.receivedBaddie(baddiesList[id]);
+                game.client.receivedBaddie(baddiesList[id]);
             }
         });
     }
@@ -418,7 +419,7 @@ export default class Dungeon extends Phaser.State {
             itemsArray: itemsArray
         }
         
-        this.client.tryCreateDungeon(mapData);
+        game.client.tryCreateDungeon(mapData);
     }
 
     resetDisconnectTimeout() {
