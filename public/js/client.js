@@ -1,3 +1,5 @@
+import game from "./game.js"
+
 export default class Client {
     constructor(dungeonState) {
         this.state = dungeonState;
@@ -13,7 +15,17 @@ export default class Client {
             this.state.updateScore(updatePackage.score);
             this.state.resetDisconnectTimeout();
         });
-    }
+    };
+
+    joinDungeon(name) {
+        this.socket.emit('joinDungeon', name, (enteredDungeon) => {
+            if (enteredDungeon) {
+                game.state.start('Dungeon');
+            } else {
+                alert("Dungeon does not exist");
+            }
+        });
+    };
 
     sendPlayer(x, y, xSpear, ySpear, angleSpear) {
         let playerData = {
@@ -24,7 +36,7 @@ export default class Client {
             angleSpear: angleSpear
         }
         this.socket.emit('addPlayerToServer', playerData);
-    }
+    };
 
     sendBaddieData(id, x, y, health) {
         let baddieData = {
@@ -34,31 +46,43 @@ export default class Client {
             health: health
         }
         this.socket.emit('updateBaddie', baddieData);
-    }
+    };
 
     testFunc() {
         this.socket.emit('test', "Test Went Thru");
-    }
+    };
 
     enteredDungeon() {
         this.socket.emit('enterDungeon');
-    }
+    };
 
     playerMoved(playerData) {
         this.socket.emit('playerMoved', playerData);
-    }
+    };
 
     receivedBaddie(baddieData) {
         this.socket.emit('receivedBaddie', baddieData);
-    }
+    };
 
     itemCollected(itemId) {
         this.socket.emit('itemCollected', itemId);
-    }
+    };
 
     tryCreateDungeon(mapData) {
         this.socket.emit('instantiateDungeon', mapData, (msg) => {
             console.log(msg);
         });
-    }
+    };
+
+    deleteDungeon(mapName) {
+        this.socket.emit('closeDungeon', mapName, (msg) => {
+            console.log(msg);
+        });
+    };
+
+    reqServers(self) {
+        this.socket.emit('reqServers', "", (list) => {
+            self.serverList.setText("Servers: " + list);
+        });
+    };
 };
