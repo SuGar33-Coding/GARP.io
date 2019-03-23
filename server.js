@@ -38,7 +38,11 @@ var package = {
 };
 
 io.on('connection', (client) => {
-    var dungeonName = "d";
+    /** 
+     * Should only be set once, when the player enters a dungeon 
+     * Used as a client-scoped reference to the dungeon that the plater is in
+     * */
+    var dungeonName;
 
     if (serverDebug) {
         console.log("Connection with ID: " + client.id);
@@ -66,6 +70,7 @@ io.on('connection', (client) => {
         }
 
         package.dungeons[dungeonName].players[client.id] = player;
+        package.dungeons[dungeonName].newborn = false; // Our little babby server ain't a kid no more :')
         if (playerDebug) {
             console.log("Player list: ");
             console.log(package.dungeons[dungeonName].players);
@@ -138,6 +143,10 @@ io.on('connection', (client) => {
         }
     });
 
+    /**
+     * Creates a new dungeon instance on the server
+     * Called from the client side
+     */
     client.on('instantiateDungeon', (mapData, callback) => {
         let mapName = mapData.name;
 
@@ -150,7 +159,8 @@ io.on('connection', (client) => {
                 players: {}, // List of all players in dungeon
                 baddies: {}, // List of all enemies in dungeon
                 items: {},
-                score: 0
+                score: 0,
+                newborn: true // Used for auto-closing dungeons upon the last remianing player leaving
             }
 
             mapData.itemsArray.forEach(item => {
@@ -211,26 +221,16 @@ io.on('connection', (client) => {
 
     });
 
-    client.on('closeDungeon', (mapName, callback) => {
-        //Fix the bug where a server restart and subsequent stale client restart crashes the server
-        //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
-        //Temp working fix: clients cannot recconect after initial connect
-        //Long-term apparently working fix: Check if map exists before closing
-        //TODO: but now that means that players dont get kicked if a map closes, so need a way to reconcile that
-
-        if (package.dungeons[mapName]) {
-            package.dungeons[mapName].baddieInterval.clear();
-            delete package.dungeons[mapName];
-            callback("Dungeon: " + mapName + " closed");
-        } else {
-            callback("No such dungeon exists");
-        }
-
-    });
+    client.on('closeDungeon', closeDungeon);
 
     client.on('disconnect', () => {
+        /* Checks if client entered a server first */
         if (package.dungeons[dungeonName] && package.dungeons[dungeonName].players[client.id]) {
             delete package.dungeons[dungeonName].players[client.id];
+            /* If leaving player was the last remaining player, close dungeon */
+            if (!package.dungeons[dungeonName].newborn && Object.keys(package.dungeons[dungeonName].players).length === 0 && package.dungeons[dungeonName].players.constructor === Object) {
+                closeDungeon(dungeonName);
+            }
         }
 
         /* This is for closing dungeons when all players have left
@@ -253,7 +253,7 @@ io.on('connection', (client) => {
 });
 
 server.sendUpdate = () => {
-    Object.keys(package.dungeons).forEach( roomName => {
+    Object.keys(package.dungeons).forEach(roomName => {
         io.to(roomName).emit('update', package.dungeons[roomName]);
     });
 };
@@ -261,3 +261,23 @@ server.sendUpdate = () => {
 server.setUpdateLoop = () => {
     setInterval(server.sendUpdate, server.clientUpdateRate);
 };
+
+function closeDungeon(dungeonName, callback) {
+    //Fix the bug where a server restart and subsequent stale client restart crashes the server
+    //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
+    //Temp working fix: clients cannot recconect after initial connect
+    //Long-term apparently working fix: Check if map exists before closing
+    //TODO: but now that means that players dont get kicked if a map closes, so need a way to reconcile that
+
+    if (package.dungeons[dungeonName]) {
+        package.dungeons[dungeonName].baddieInterval.clear();
+        delete package.dungeons[dungeonName];
+        if (callback) {
+            callback("Dungeon: " + dungeonName + " closed");
+        }
+    } else {
+        if (callback) {
+            callback("No such dungeon exists");
+        }
+    }
+}
