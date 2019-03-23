@@ -23,6 +23,8 @@ export default class MainMenu extends Phaser.State {
         let refreshRoomsButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY+300, 'playButton', this.refreshRooms, this, 2, 1, 0);
         refreshRoomsButton.anchor.setTo(0.5);
 
+        this.refreshRooms();
+
     }
 
     /**
@@ -32,7 +34,6 @@ export default class MainMenu extends Phaser.State {
         let dungeonName = prompt("Dungeon to join", "default");
 
         this.game.client.joinDungeon(dungeonName);
-        //this.state.start('Dungeon');
     }
 
     /**
@@ -61,6 +62,7 @@ export default class MainMenu extends Phaser.State {
         }
         
         this.game.client.tryCreateDungeon(mapData);
+        this.refreshRooms();
     }
 
     /**
@@ -69,6 +71,7 @@ export default class MainMenu extends Phaser.State {
     deleteDungeon() {
         let dungeonName = prompt("Dungeon to delete", "default");
         this.game.client.deleteDungeon(dungeonName);
+        this.refreshRooms();
     }
 
     /**
