@@ -30,18 +30,34 @@ var itemsDebug = false;
 
 /* The update package to be sent every update */
 var package = {
-    maps: {},
-    players: {}, // List of all players in game
-    baddies: {}, // List of all enemies in game
-    items: {},
-    score: 0
+    dungeons: {}
+    //players: {}, // List of all players in game
+    //baddies: {}, // List of all enemies in game
+    //items: {},
+    //score: 0
 };
 
 io.on('connection', (client) => {
+    /** 
+     * Should only be set once, when the player enters a dungeon 
+     * Used as a client-scoped reference to the dungeon that the plater is in
+     * */
+    var dungeonName;
+
     if (serverDebug) {
         console.log("Connection with ID: " + client.id);
         client.emit('check', ("Check yoself " + client.id));
-    }
+    };
+
+    client.on('joinDungeon', (name, callback) => {
+        if (package.dungeons[name]) {
+            client.join(name);
+            dungeonName = name;
+            callback(true);
+        } else {
+            callback(false);
+        }
+    });
 
     client.on("addPlayerToServer", (playerData) => {
         player = {
@@ -52,23 +68,24 @@ io.on('connection', (client) => {
             yPosSpear: playerData.yPosSpear,
             angleSpear: playerData.angleSpear
         }
-        package.players[client.id] = player;
+
+        package.dungeons[dungeonName].players[client.id] = player;
+        package.dungeons[dungeonName].newborn = false; // Our little babby server ain't a kid no more :')
         if (playerDebug) {
             console.log("Player list: ");
-            console.log(package.players);
+            console.log(package.dungeons[dungeonName].players);
         };
     });
 
     client.on('playerMoved', (playerData) => {
         /* check for erroneous server restart with peristent client */
-        if (package.players[client.id]) { // If player does indeed exist on the current player list
-            package.players[client.id].xPos = playerData.xPos;
-            package.players[client.id].yPos = playerData.yPos;
-        } else { //TODO: Implement a way for the client to reconcile this too...
-            //console.log("Player no longer exists on server, creating new server-side player instance");
-            console.log("Player no longer exists on server...");
+        if (package.dungeons[dungeonName].players[client.id]) { // If player does indeed exist on the current player list
+            package.dungeons[dungeonName].players[client.id].xPos = playerData.xPos;
+            package.dungeons[dungeonName].players[client.id].yPos = playerData.yPos;
+        } else { //TODO: Implement a way for the client to reconcile this too... ~ As of now, clients cannot recconect ~
+            console.log("Player no longer exists on server, creating new server-side player instance");
 
-            // this only adds the player on server side, the client doesn't recognize the new socket id's
+            // this only adds the player on server side, the client doesn't recognize the new socket id's of other players
             player = {
                 id: client.id,
                 xPos: playerData.xPos,
@@ -77,10 +94,10 @@ io.on('connection', (client) => {
                 yPosSpear: playerData.yPosSpear,
                 angleSpear: playerData.angleSpear
             }
-            package.players[client.id] = player;
+            package.dungeons[dungeonName].players[client.id] = player;
             if (playerDebug) {
                 console.log("Player list: ");
-                console.log(package.players);
+                console.log(package.dungeons[dungeonName].players);
             };
         }
     });
@@ -94,51 +111,61 @@ io.on('connection', (client) => {
     });
 
     client.on('receivedBaddie', baddie => {
-        package.baddies[baddie.id].instances[client.id] = true;
+        package.dungeons[dungeonName].baddies[baddie.id].instances[client.id] = true;
         if (baddieDebug) {
-            console.log(package.baddies[baddie.id]);
+            console.log(package.dungeons[dungeonName].baddies[baddie.id]);
         };
     });
 
     client.on('updateBaddie', baddie => {
         if (baddie.health < 1) {
-            delete package.baddies[baddie.id];
-            package.score ++;
+            delete package.dungeons[dungeonName].baddies[baddie.id];
+            package.dungeons[dungeonName].score++;
             if (baddieDebug) {
                 console.log("Baddie " + baddie.id + " defeated");
             }
         } else {
-             //TODO: Fix the bug where a server restart with lingering clients crashes everything
-            package.baddies[baddie.id].xPos = baddie.xPos;
-            package.baddies[baddie.id].yPos = baddie.yPos;
-            package.baddies[baddie.id].health = baddie.health;
+            package.dungeons[dungeonName].baddies[baddie.id].xPos = baddie.xPos;
+            package.dungeons[dungeonName].baddies[baddie.id].yPos = baddie.yPos;
+            package.dungeons[dungeonName].baddies[baddie.id].health = baddie.health;
         }
         if (baddieDebug) {
-            console.log(package.baddies[baddie.id]);
+            console.log(package.dungeons[dungeonName].baddies[baddie.id]);
         }
     });
 
     client.on('itemCollected', itemId => {
-        delete package.items[itemId];
-        package.score ++;
+        delete package.dungeons[dungeonName].items[itemId];
+        package.dungeons[dungeonName].score++;
 
         if (itemsDebug) {
-            console.log(package.items);
+            console.log(package.dungeons[dungeonName].items);
         }
     });
 
+    /**
+     * Creates a new dungeon instance on the server
+     * Called from the client side
+     */
     client.on('instantiateDungeon', (mapData, callback) => {
-        if (package.maps[mapData.name]) {
+        let mapName = mapData.name;
+
+        if (package.dungeons[mapName]) {
             callback("Dungeon exists");
         } else {
-            package.maps[mapData.name] = {
-                name: mapData.name,
+            package.dungeons[mapName] = {
+                name: mapName,
                 baddieSpawnPoint: mapData.baddieSpawnPoint,
+                players: {}, // List of all players in dungeon
+                baddies: {}, // List of all enemies in dungeon
+                items: {},
+                score: 0,
+                newborn: true // Used for auto-closing dungeons upon the last remianing player leaving
             }
 
             mapData.itemsArray.forEach(item => {
                 let id = uniqid("item-");
-                package.items[id] = {
+                package.dungeons[mapName].items[id] = {
                     id: id,
                     xPos: item.xPos,
                     yPos: item.yPos,
@@ -146,76 +173,121 @@ io.on('connection', (client) => {
                 };
             });
 
-            client.dungeonName = mapData.name;
-
             callback("Dungeon instantiated");
 
             if (itemsDebug) {
-                console.log(package.items);
+                console.log(package.dungeons[mapName].items);
             }
 
+            // move all the updatepacket info to under the map and add player to map on entry
             var testBaddieId = uniqid('baddie-');
-            package.baddies[testBaddieId] = {
+            package.dungeons[mapName].baddies[testBaddieId] = {
                 id: testBaddieId,
-                xPos: package.maps['dungeon1'].baddieSpawnPoint.x,
-                yPos: package.maps['dungeon1'].baddieSpawnPoint.y,
+                xPos: package.dungeons[mapData.name].baddieSpawnPoint.x,
+                yPos: package.dungeons[mapData.name].baddieSpawnPoint.y,
                 health: 30,
                 instances: {} // List of clients that have received this baddie
             }
 
             var generateRandomBaddies = () => {
                 var testBaddieId = uniqid('baddie-');
-                package.baddies[testBaddieId] = {
+                package.dungeons[mapName].baddies[testBaddieId] = {
                     id: testBaddieId,
-                    xPos: package.maps['dungeon1'].baddieSpawnPoint.x + Math.random() * 100,
-                    yPos: package.maps['dungeon1'].baddieSpawnPoint.y + Math.random() * 100,
+                    xPos: package.dungeons[mapData.name].baddieSpawnPoint.x + Math.random() * 100,
+                    yPos: package.dungeons[mapData.name].baddieSpawnPoint.y + Math.random() * 100,
                     health: 30,
                     instances: {}
                 }
                 if (baddieDebug) {
-                    console.log("Baddie " + package.baddies[testBaddieId].id + " spawned at: " 
-                        + package.baddies[testBaddieId].xPos 
-                        + ", " + package.baddies[testBaddieId].yPos);
+                    console.log("Baddie " + package.dungeons[mapName].baddies[testBaddieId].id + " spawned at: "
+                        + package.dungeons[mapName].baddies[testBaddieId].xPos
+                        + ", " + package.dungeons[mapName].baddies[testBaddieId].yPos);
                 }
             };
 
-            package.maps[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
+            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
         }
     });
 
+    client.on('reqServers', (nothin, callback) => {
+        if (package.dungeons) {
+            if (serverDebug) {
+                console.log("Sending: " + Object.keys(package.dungeons));
+            };
+            callback(Object.keys(package.dungeons));
+        } else {
+            callback("No servers available");
+        }
+
+    });
+
+    client.on('closeDungeon', closeDungeon);
+
     client.on('disconnect', () => {
-        delete package.players[client.id];
-        if (Object.keys(package.players).length === 0 && package.players.constructor === Object) {
-            //console.log("got here");
-            server.closeDungeon('dungeon1');
+        /* Checks if client entered a server first */
+        if (package.dungeons[dungeonName] && package.dungeons[dungeonName].players[client.id]) {
+            delete package.dungeons[dungeonName].players[client.id];
+            /* If leaving player was the last remaining player, close dungeon */
+            if (!package.dungeons[dungeonName].newborn && Object.keys(package.dungeons[dungeonName].players).length === 0 && package.dungeons[dungeonName].players.constructor === Object) {
+                closeDungeon(dungeonName);
+            }
+        }
+
+        /* This is for closing dungeons when all players have left
+         * It's not being used right nao
+        if (Object.keys(package.dungeons[dungeonName].players).length === 0 && package.dungeons[dungeonName].players.constructor === Object) {
+            
         } else {
             
         }
+        */
 
         if (serverDebug) {
             console.log("Disconnection and removal with ID: " + client.id);
         }
         if (playerDebug) {
             console.log("Player list: ");
-            console.log(package.players);
+            console.log(package.dungeons[dungeonName].players);
         }
     });
 });
 
 server.sendUpdate = () => {
-    io.to("dungeon1").emit('update', package);
+    Object.keys(package.dungeons).forEach(roomName => {
+        Object.keys(package.dungeons[roomName].baddies).forEach(baddieid => {
+            this.baddie = package.dungeons[roomName].baddies[baddieid];
+            this.baddie.closest = 100000;
+            Object.keys(package.dungeons[roomName].players).forEach(playerid =>{
+                this.player = package.dungeons[roomName].players[playerid];
+                console.log(Math.hypot(this.player.xPos, this.player.yPos))
+                this.baddie.closest = Math.min(this.baddie.closest, Math.hypot(this.player.xPos, this.player.yPos))
+            }, this);
+        }, this);
+
+        io.to(roomName).emit('update', package.dungeons[roomName]);
+    });
 };
 
 server.setUpdateLoop = () => {
     setInterval(server.sendUpdate, server.clientUpdateRate);
 };
 
-server.closeDungeon = (mapName) => {
-    package.maps[mapName].baddieInterval.clear();
-    delete package.maps[mapName];
+function closeDungeon(dungeonName, callback) {
+    //Fix the bug where a server restart and subsequent stale client restart crashes the server
+    //Proposed fix: do a timed check to kick the client after a second or two if they can't prove they are a non-stale client... not sure how to do that tho
+    //Temp working fix: clients cannot recconect after initial connect
+    //Long-term apparently working fix: Check if map exists before closing
+    //TODO: but now that means that players dont get kicked if a map closes, so need a way to reconcile that
 
-    // Eventually these will be properties of each map. For now, hax
-    package.items = {};
-    package.baddies = {};
-    package.score = 0;
-};
+    if (package.dungeons[dungeonName]) {
+        package.dungeons[dungeonName].baddieInterval.clear();
+        delete package.dungeons[dungeonName];
+        if (callback) {
+            callback("Dungeon: " + dungeonName + " closed");
+        }
+    } else {
+        if (callback) {
+            callback("No such dungeon exists");
+        }
+    }
+}

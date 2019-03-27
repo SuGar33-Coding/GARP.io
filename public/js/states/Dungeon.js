@@ -1,15 +1,21 @@
-import Client from '../client.js'
+import game from "../game.js"
 
 export default class Dungeon extends Phaser.State {
     constructor() {
         super();
         this.spriteScale = 1;
-        this.client = new Client(this);
+        /* Initializing client here to pass it the Dungeon.this */
+        //game.client = new Client(this);
+        //console.log(this);
+        //console.log("Dungeon constructor ran");
     }
 
     create() {
         // ======Setting up the map=============
-        this.tryCreateDungeon(); // If first player to join, this instatntiates the dungeon
+
+        this.disconnectTimer = setTimeout(() => {
+            console.log("Well that escalated quickly");
+        }, 2000);
 
         this.map = this.game.add.tilemap('dungeon');
 
@@ -35,6 +41,7 @@ export default class Dungeon extends Phaser.State {
 
         /* Teh SP34R */
         this.spear = this.player.addChild(this.make.sprite(10, 0, 'spear'));
+        this.spear.exhausted = false; //A bool to check if it has already delt its desired damage after being used 
         this.game.physics.arcade.enable(this.spear);
         this.spear.anchor.setTo(.5);
 
@@ -126,13 +133,16 @@ export default class Dungeon extends Phaser.State {
             }
 
             this.game.time.events.add(50, function () {
-                this.game.physics.arcade.overlap(this.spear, this.baddies, this.damage, null, this);
+                this.game.physics.arcade.overlap(this.spear, this.baddies, this.damage, () => {
+                    return !this.spear.exhausted;
+                }, this);
             }, this);
 
             this.game.time.events.add(300, function () {
                 this.spear.angle = 0;
                 this.spear.x = 10;
                 this.spear.y = 0;
+                this.spear.exhausted = false;
                 this.sendPlayerData()
             }, this);
             //this.attack.destroy();
@@ -156,7 +166,7 @@ export default class Dungeon extends Phaser.State {
         console.log(this.score);
 
         // ============Start update loop==============
-        this.client.enteredDungeon();
+        this.game.client.enteredDungeon();
     }
 
     createItems() {
@@ -196,7 +206,7 @@ export default class Dungeon extends Phaser.State {
         }
 
         if (this.player.positon !== this.player.previousPosition) {
-            this.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
+            this.game.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
         }
 
         /* Handle Baddie AI */
@@ -205,17 +215,16 @@ export default class Dungeon extends Phaser.State {
     }
 
     damage(weapon, attacked) {
+        weapon.exhausted = true;
         attacked.health -= 10;
         this.sendBaddieData(attacked);
         console.log(attacked.id + ": " + attacked.health);
     }
 
     collect(player, item) {
-        this.client.itemCollected(item.id);
         item.destroy();
         this.items.remove(item);
-
-
+        this.game.client.itemCollected(item.id);
     }
 
     /** Handle how baddies move
@@ -311,7 +320,7 @@ export default class Dungeon extends Phaser.State {
      */
     updateOtherPlayers(playerList) {
         Object.keys(playerList).forEach(id => {
-            if (id !== this.client.socket.id) {
+            if (id !== this.game.client.socket.id) {
                 let indexedPlayer = null;
                 this.otherPlayers.forEach(otherPlayer => {
                     if (id === otherPlayer.id) {
@@ -336,7 +345,7 @@ export default class Dungeon extends Phaser.State {
     refreshOtherPlayers(playerList) {
         this.otherPlayers.removeAll(true);
         Object.keys(playerList).forEach(id => {
-            if (id !== this.client.socket.id) {
+            if (id !== this.game.client.socket.id) {
                 this.createOtherPlayer(playerList[id]);
             }
         });
@@ -347,7 +356,7 @@ export default class Dungeon extends Phaser.State {
      * Since the otherPlayers are fully created every update this is paradigmatically appropriate
      */
     sendPlayerData() {
-        this.client.sendPlayer(this.player.x, this.player.y, this.spear.x, this.spear.y, this.spear.angle);
+        this.game.client.sendPlayer(this.player.x, this.player.y, this.spear.x, this.spear.y, this.spear.angle);
     }
 
     /**
@@ -356,7 +365,7 @@ export default class Dungeon extends Phaser.State {
      * @param {*} baddie 
      */
     sendBaddieData(baddie) {
-        this.client.sendBaddieData(baddie.id, baddie.x, baddie.y, baddie.health);
+        this.game.client.sendBaddieData(baddie.id, baddie.x, baddie.y, baddie.health);
     }
 
     /**
@@ -370,6 +379,7 @@ export default class Dungeon extends Phaser.State {
                 baddie.x = baddiesList[baddie.id].xPos;
                 baddie.y = baddiesList[baddie.id].yPos;
                 baddie.health = baddiesList[baddie.id].health;
+                //console.log(baddiesList[baddie.id].closest);
                 //console.log(baddie.x + ' ' + baddie.y + ' ' + baddie.health);
             } else {
                 baddie.kill();
@@ -380,13 +390,13 @@ export default class Dungeon extends Phaser.State {
         /* Checks if global server-side baddie is on client yet, if not, add it */
         Object.keys(baddiesList).forEach(id => {
             //console.log(id.instances);
-            //console.log(this.client.socket.id);
-            if (baddiesList[id].instances[this.client.socket.id]) {
+            //console.log(client.socket.id);
+            if (baddiesList[id].instances[this.game.client.socket.id]) {
                 // It's in the client, and I'm scared of null being false
                 // TODO: Test !null
             } else {
                 this.createBaddie(baddiesList[id]);
-                this.client.receivedBaddie(baddiesList[id]);
+                this.game.client.receivedBaddie(baddiesList[id]);
             }
         });
     }
@@ -425,7 +435,14 @@ export default class Dungeon extends Phaser.State {
             itemsArray: itemsArray
         }
         
-        this.client.tryCreateDungeon(mapData);
+        this.game.client.tryCreateDungeon(mapData);
+    }
+
+    resetDisconnectTimeout() {
+        clearTimeout(this.disconnectTimer);
+        this.disconnectTimer = setTimeout(() => {
+            this.state.start('MainMenu', true, true);
+        }, 2000);
     }
 
     /**

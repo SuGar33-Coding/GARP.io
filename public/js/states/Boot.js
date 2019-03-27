@@ -7,6 +7,7 @@ export default class Boot extends Phaser.State {
 	}
 
 	create() {
+
 		this.game.stage.backgroundColor = '#000';
 
 		this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
