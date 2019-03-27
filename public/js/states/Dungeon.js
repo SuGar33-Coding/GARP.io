@@ -369,6 +369,7 @@ export default class Dungeon extends Phaser.State {
                 baddie.x = baddiesList[baddie.id].xPos;
                 baddie.y = baddiesList[baddie.id].yPos;
                 baddie.health = baddiesList[baddie.id].health;
+                //console.log(baddiesList[baddie.id].closest);
                 //console.log(baddie.x + ' ' + baddie.y + ' ' + baddie.health);
             } else {
                 baddie.kill();

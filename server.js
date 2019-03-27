@@ -254,6 +254,16 @@ io.on('connection', (client) => {
 
 server.sendUpdate = () => {
     Object.keys(package.dungeons).forEach(roomName => {
+        Object.keys(package.dungeons[roomName].baddies).forEach(baddieid => {
+            this.baddie = package.dungeons[roomName].baddies[baddieid];
+            this.baddie.closest = 100000;
+            Object.keys(package.dungeons[roomName].players).forEach(playerid =>{
+                this.player = package.dungeons[roomName].players[playerid];
+                console.log(Math.hypot(this.player.xPos, this.player.yPos))
+                this.baddie.closest = Math.min(this.baddie.closest, Math.hypot(this.player.xPos, this.player.yPos))
+            }, this);
+        }, this);
+
         io.to(roomName).emit('update', package.dungeons[roomName]);
     });
 };
