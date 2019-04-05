@@ -2,6 +2,7 @@ import Boot from './states/Boot.js';
 import Preload from './states/Preload.js';
 import MainMenu from './states/MainMenu.js';
 import Dungeon from './states/Dungeon.js';
+import ServerList from './states/ServerList.js';
 import Client from './client.js'
 
 class Game extends Phaser.Game {
@@ -12,6 +13,7 @@ class Game extends Phaser.Game {
         this.state.add('Boot', Boot, false);
         this.state.add('Preload', Preload), false;
         this.state.add('MainMenu', MainMenu, false);
+        this.state.add('ServerList', ServerList, false);
         this.dungeonState = this.state.add('Dungeon', Dungeon, false);
     }
 }

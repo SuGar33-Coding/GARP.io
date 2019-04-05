@@ -19,7 +19,11 @@ export default class Preload extends Phaser.State {
         this.load.spritesheet('baddieHurt','assets/sprites/baddieHurt.png');
         this.load.spritesheet('chest','assets/sprites/chest.png');
         this.load.spritesheet('zombie','assets/sprites/zombie.png');
-        this.load.spritesheet('playButton', 'assets/images/playButton.png');
+        this.load.spritesheet('playButton', 'assets/images/BetterPlayButton.png');
+        this.load.spritesheet('createButton', 'assets/images/createButton.png');
+        this.load.spritesheet('joinButton', 'assets/images/joinButton.png');
+        this.load.spritesheet('deleteButton', 'assets/images/deleteButton.png');
+        this.load.spritesheet('refreshButton', 'assets/images/refreshButton.png');
         this.load.tilemap('dungeon','assets/tilemaps/TileMap.json', null, Phaser.Tilemap.TILED_JSON);
         this.load.image('gameTiles', 'assets/tilemaps/DungeonTileSet.png');
     }

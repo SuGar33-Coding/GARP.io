@@ -3,7 +3,7 @@ import game from "../game.js"
 export default class Dungeon extends Phaser.State {
     constructor() {
         super();
-        this.spriteScale = 2;
+        this.spriteScale = 1;
         /* Initializing client here to pass it the Dungeon.this */
         //game.client = new Client(this);
         //console.log(this);
