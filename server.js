@@ -259,8 +259,8 @@ server.sendUpdate = () => {
             this.baddie.closest = 100000;
             Object.keys(package.dungeons[roomName].players).forEach(playerid =>{
                 this.player = package.dungeons[roomName].players[playerid];
-                console.log(Math.hypot(this.player.xPos, this.player.yPos))
-                this.baddie.closest = Math.min(this.baddie.closest, Math.hypot(this.player.xPos, this.player.yPos))
+                console.log(Math.hypot((this.player.xPos-this.baddie.xPos), (this.player.yPos-this.player.yPos)))
+                this.baddie.closest = Math.min(this.baddie.closest, Math.hypot((this.player.xPos-this.baddie.xPos), (this.player.yPos-this.player.yPos)))
             }, this);
         }, this);
 

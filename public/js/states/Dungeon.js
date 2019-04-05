@@ -187,6 +187,7 @@ export default class Dungeon extends Phaser.State {
         this.game.physics.arcade.collide(this.actors, this.actors);
         this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
 
+        /* Handle moving player */
         var speed = 120;
         this.player.body.velocity.y = 0;
         this.player.body.velocity.x = 0;
@@ -209,9 +210,6 @@ export default class Dungeon extends Phaser.State {
             this.game.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
         }
 
-        /* Handle Baddie AI */
-        this.baddieMove();
-
     }
 
     damage(weapon, attacked) {
@@ -225,24 +223,6 @@ export default class Dungeon extends Phaser.State {
         item.destroy();
         this.items.remove(item);
         this.game.client.itemCollected(item.id);
-    }
-
-    /** Handle how baddies move
-     * If player is withing distance, baddie will move towards them
-     * If in baddie specific range, baddie will attack them
-     */ 
-    baddieMove(){
-        this.baddies.forEach(function(baddie){ // TODO: Turn distance into a baddie.distance later
-            
-            var distance = 500
-            if(Phaser.Math.distance(this.player.x, this.player.y, baddie.x, baddie.y) < distance){  // If the baddie is within the predetermined distance
-
-                this.game.physics.arcade.moveToObject(baddie,this.player,100,10); // I believe 100 is the velocity. TODO: make velocity baddie specific
-            } else {  // Baddie will stop chasing you once out of range.  TODO: Decide whether this distance should be longer or not
-                baddie.body.velocity.x = 0;
-                baddie.body.velocity.y = 0;
-            }
-        }, this)
     }
 
     /**
