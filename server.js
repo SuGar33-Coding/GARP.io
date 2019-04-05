@@ -253,14 +253,19 @@ io.on('connection', (client) => {
 });
 
 server.sendUpdate = () => {
+
+    // For every dungeon, for each baddie in that dungeon, find the player that the baddie is closes to
+    // TODO: Only change this on player move rather than in sendUpdate
     Object.keys(package.dungeons).forEach(roomName => {
         Object.keys(package.dungeons[roomName].baddies).forEach(baddieid => {
             this.baddie = package.dungeons[roomName].baddies[baddieid];
-            this.baddie.closest = 100000;
+            this.baddie.closestdist = 100000;  // TODO: Change to some sort of max int so that 
             Object.keys(package.dungeons[roomName].players).forEach(playerid =>{
                 this.player = package.dungeons[roomName].players[playerid];
-                console.log(Math.hypot(this.player.xPos, this.player.yPos))
-                this.baddie.closest = Math.min(this.baddie.closest, Math.hypot(this.player.xPos, this.player.yPos))
+                if(this.baddie.closestdist > Math.hypot((this.player.xPos-this.baddie.xPos), (this.player.yPos-this.player.yPos))){
+                    this.baddie.closestdist = Math.hypot((this.player.xPos-this.baddie.xPos), (this.player.yPos-this.player.yPos));
+                    this.baddie.closest = playerid;
+                }
             }, this);
         }, this);
 
