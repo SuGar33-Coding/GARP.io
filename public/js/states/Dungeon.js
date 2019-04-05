@@ -163,7 +163,7 @@ export default class Dungeon extends Phaser.State {
 
         //this.world.bringToTop(this.PLEASEWORK);
 
-        console.log(this.score);
+        //console.log(this.score);
 
         // ============Start update loop==============
         this.game.client.enteredDungeon();
@@ -210,6 +210,17 @@ export default class Dungeon extends Phaser.State {
             this.game.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
         }
 
+        /* Handle moving baddies */
+        this.baddies.forEach(baddie => {
+            if(baddie.closest === this.player.id){
+                if(baddie.x < this.player.x){baddie.body.velocity.x += speed/2;}
+                else{baddie.body.velocity.x -= speed/2;}
+
+                if(baddie.y < this.player.y){baddie.body.velocity.y += speed/2;}
+                else{baddie.body.velocity.y -= speed/2;}
+                this.sendBaddieData(baddie);
+            }
+        },this);
     }
 
     damage(weapon, attacked) {
@@ -287,6 +298,7 @@ export default class Dungeon extends Phaser.State {
         baddie.anchor.setTo(.5);
         baddie.health = baddieData.health;
         baddie.id = baddieData.id;
+        baddie.closest = baddieData.closest;
         this.baddies.add(baddie);
         this.game.physics.arcade.enable(this.baddies);
     }
@@ -354,7 +366,7 @@ export default class Dungeon extends Phaser.State {
      */
     updateBaddies(baddiesList) {
         /* Checks if client-side baddie exists on the server, if not, kill it */
-        this.baddies.forEach(baddie => { // If it does, update its params
+        /*this.baddies.forEach(baddie => { // If it does, update its params
             if (baddiesList[baddie.id]) {
                 baddie.x = baddiesList[baddie.id].xPos;
                 baddie.y = baddiesList[baddie.id].yPos;
