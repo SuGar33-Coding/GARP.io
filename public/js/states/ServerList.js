@@ -1,9 +1,11 @@
 export default class ServerList extends Phaser.State {
 
     create() {
-        this.serverList = this.add.text(this.game.world.centerX, this.game.world.centerY-300, "Servers:", {
+        this.serverList = this.add.text(0, this.game.world.centerY-250, "Servers:", {
             fill: "#ffffff"
         });
+        this.serverList.anchor.setTo(0.5,0.5);
+        this.serverList.x = this.game.world.centerX;
 
         let joinButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY, 'joinButton', this.startGame, this, 2, 1, 0);
         joinButton.anchor.setTo(0.5);

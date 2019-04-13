@@ -6,10 +6,6 @@ export default class MainMenu extends Phaser.State {
         this.title.anchor.setTo(0.5);
         this.title.scale.setTo(2);
 
-        this.serverList = this.add.text(0, 0, "Servers:", {
-            fill: "#ffffff"
-        });
-
         let playButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY, 'playButton', this.enterServerList, this, 2, 1, 0);
         playButton.anchor.setTo(0.5);
 
