@@ -23,8 +23,8 @@ server.listen(8081, () => {
 });
 
 // ===========Websocket Stuff==============
-var serverDebug = false;
-var playerDebug = false;
+var serverDebug = true;
+var playerDebug = false; //TODO: Something in here is broken lol
 var baddieDebug = false;
 var itemsDebug = false;
 
@@ -110,11 +110,12 @@ io.on('connection', (client) => {
         console.log(message);
     });
 
-    client.on('receivedBaddie', baddie => {
+    client.on('receivedBaddie', (baddie, callback) => {
         package.dungeons[dungeonName].baddies[baddie.id].instances[client.id] = true;
         if (baddieDebug) {
             console.log(package.dungeons[dungeonName].baddies[baddie.id]);
         };
+        callback();
     });
 
     client.on('updateBaddie', baddie => {
@@ -180,22 +181,24 @@ io.on('connection', (client) => {
             }
 
             // move all the updatepacket info to under the map and add player to map on entry
-            var testBaddieId = uniqid('baddie-');
-            package.dungeons[mapName].baddies[testBaddieId] = {
-                id: testBaddieId,
-                xPos: package.dungeons[mapData.name].baddieSpawnPoint.x,
-                yPos: package.dungeons[mapData.name].baddieSpawnPoint.y,
-                health: 30,
-                instances: {} // List of clients that have received this baddie
-            }
+            let testBaddieId = uniqid('baddie-');
+            // package.dungeons[mapName].baddies[testBaddieId] = {
+            //     id: testBaddieId,
+            //     xPos: package.dungeons[mapData.name].baddieSpawnPoint.x,
+            //     yPos: package.dungeons[mapData.name].baddieSpawnPoint.y,
+            //     health: 30,
+            //     targetPlayerId: "",
+            //     instances: {} // List of clients that have received this baddie
+            // }
 
             var generateRandomBaddies = () => {
-                var testBaddieId = uniqid('baddie-');
+                let testBaddieId = uniqid('baddie-');
                 package.dungeons[mapName].baddies[testBaddieId] = {
                     id: testBaddieId,
                     xPos: package.dungeons[mapData.name].baddieSpawnPoint.x + Math.random() * 100,
                     yPos: package.dungeons[mapData.name].baddieSpawnPoint.y + Math.random() * 100,
                     health: 30,
+                    targetPlayerId: "",
                     instances: {}
                 }
                 if (baddieDebug) {
@@ -205,7 +208,7 @@ io.on('connection', (client) => {
                 }
             };
 
-            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 15000);
+            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 9000);
         }
     });
 
@@ -219,6 +222,11 @@ io.on('connection', (client) => {
             callback("No servers available");
         }
 
+    });
+
+    client.on('targetPlayer', (baddieId, playerId) => {
+        package.dungeons[dungeonName].baddies[baddieId].targetPlayerId = playerId;
+        console.log(baddieId + " is targeting " + playerId);
     });
 
     client.on('closeDungeon', closeDungeon);
@@ -254,20 +262,20 @@ io.on('connection', (client) => {
 
 server.sendUpdate = () => {
 
-    // For every dungeon, for each baddie in that dungeon, find the player that the baddie is closes to
+    // For every dungeon, for each baddie in that dungeon, find the player that the baddie is closest to
     // TODO: Only change this on player move rather than in sendUpdate
     Object.keys(package.dungeons).forEach(roomName => {
-        Object.keys(package.dungeons[roomName].baddies).forEach(baddieid => {
-            this.baddie = package.dungeons[roomName].baddies[baddieid];
-            this.baddie.closestdist = 100000;  // TODO: Change to some sort of max int so that 
-            Object.keys(package.dungeons[roomName].players).forEach(playerid =>{
-                this.player = package.dungeons[roomName].players[playerid];
-                if(this.baddie.closestdist > Math.hypot((this.player.xPos-this.baddie.xPos), (this.player.yPos-this.player.yPos))){
-                    this.baddie.closestdist = Math.hypot((this.player.xPos-this.baddie.xPos), (this.player.yPos-this.player.yPos));
-                    this.baddie.closest = playerid;
-                }
-            }, this);
-        }, this);
+        // Object.keys(package.dungeons[roomName].baddies).forEach(baddieid => {
+        //     let baddie = package.dungeons[roomName].baddies[baddieid];
+        //     baddie.closestdist = 100000;  // TODO: Change to some sort of max int so that 
+        //     Object.keys(package.dungeons[roomName].players).forEach(playerid =>{
+        //         let player = package.dungeons[roomName].players[playerid];
+        //         if(baddie.closestdist > Math.hypot((player.xPos-baddie.xPos), (player.yPos-player.yPos))){
+        //             baddie.closestdist = Math.hypot((player.xPos-baddie.xPos), (player.yPos-player.yPos));
+        //             baddie.closest = playerid;
+        //         }
+        //     });
+        // });
 
         io.to(roomName).emit('update', package.dungeons[roomName]);
     });

@@ -56,6 +56,7 @@ export default class Dungeon extends Phaser.State {
 
         // =========Dealing with baddie==============
         this.baddies = this.add.group();
+        this.game.physics.arcade.enable(this.baddies);
 
         /* set spawn point */
         this.baddieSpawnPoint = this.findObjectsByType('enemy', this.map, 'objectLayer');
@@ -69,8 +70,8 @@ export default class Dungeon extends Phaser.State {
         /* Group containing all bodies that collide with the world and eachother */
         this.actors = this.game.add.group();
         this.actors.add(this.player);
-        this.actors.add(this.baddies);
         this.actors.add(this.otherPlayers);
+        //this.actors.add(this.baddies);
 
         this.items = this.game.add.group();
         this.items.enableBody = true;
@@ -79,7 +80,6 @@ export default class Dungeon extends Phaser.State {
         this.game.camera.follow(this.player);
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
-
 
         this.wasd = {
             up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
@@ -158,33 +158,19 @@ export default class Dungeon extends Phaser.State {
         this.score.fixedToCamera = true;
         this.score.cameraOffset.setTo(20, 20);
 
-        //this.PLEASEWORK = this.add.group();
-        //this.PLEASEWORK = (this.score);
-
-        //this.world.bringToTop(this.PLEASEWORK);
-
-        //console.log(this.score);
-
         // ============Start update loop==============
         this.game.client.enteredDungeon();
     }
 
-    createItems() {
-        this.items = this.game.add.group();
-        this.items.enableBody = true;
-
-        var item;
-        let result = this.findObjectsByType('item', this.map, 'objectLayer');
-        console.log(result);
-        result.forEach(function (element) {
-            this.createFromTiledObject(element, this.items);
-        }, this);
-    }
-
     update() {
         // Collision
-        this.game.physics.arcade.collide(this.actors, this.wallLayer);
-        this.game.physics.arcade.collide(this.actors, this.actors);
+        this.game.physics.arcade.collide(this.actors, this.wallLayer, () => {
+            //console.log("something collided with wall");
+        });
+        this.game.physics.arcade.collide(this.actors, this.actors, () => {
+            //console.log("some idiots collided");
+        });
+        //this.game.physics.arcade.collide(this.player, this.baddies);
         this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
 
         /* Handle moving player */
@@ -212,15 +198,29 @@ export default class Dungeon extends Phaser.State {
 
         /* Handle moving baddies */
         this.baddies.forEach(baddie => {
-            if(baddie.closest === this.player.id){
-                if(baddie.x < this.player.x){baddie.body.velocity.x += speed/2;}
-                else{baddie.body.velocity.x -= speed/2;}
+            if(baddie.targetPlayerId == this.game.client.socket.id){
+                // if(baddie.x < this.player.x){baddie.body.velocity.x += speed/2;}
+                // else{baddie.body.velocity.x -= speed/2;}
 
-                if(baddie.y < this.player.y){baddie.body.velocity.y += speed/2;}
-                else{baddie.body.velocity.y -= speed/2;}
+                // if(baddie.y < this.player.y){baddie.body.velocity.y += speed/2;}
+                // else{baddie.body.velocity.y -= speed/2;}
+                this.game.physics.arcade.moveToObject(baddie, this.player);
+
                 this.sendBaddieData(baddie);
             }
         },this);
+    }
+
+    createItems() {
+        this.items = this.game.add.group();
+        this.items.enableBody = true;
+
+        var item;
+        let result = this.findObjectsByType('item', this.map, 'objectLayer');
+        console.log(result);
+        result.forEach(function (element) {
+            this.createFromTiledObject(element, this.items);
+        }, this);
     }
 
     damage(weapon, attacked) {
@@ -286,7 +286,7 @@ export default class Dungeon extends Phaser.State {
 
         otherPlayer.id = playerData.id;
         this.otherPlayers.add(otherPlayer);
-        this.game.physics.arcade.enable(this.otherPlayers);
+        this.game.physics.arcade.enable(otherPlayer);
     }
 
     /**
@@ -298,9 +298,12 @@ export default class Dungeon extends Phaser.State {
         baddie.anchor.setTo(.5);
         baddie.health = baddieData.health;
         baddie.id = baddieData.id;
-        baddie.closest = baddieData.closest;
+        baddie.targetPlayerId = baddieData.targetPlayerId;
+        this.game.physics.arcade.enable(baddie);
         this.baddies.add(baddie);
-        this.game.physics.arcade.enable(this.baddies);
+        //this.game.physics.arcade.enable(this.baddies)
+        //this.actors.add(baddie)
+        
     }
 
     /**
@@ -366,13 +369,26 @@ export default class Dungeon extends Phaser.State {
      */
     updateBaddies(baddiesList) {
         /* Checks if client-side baddie exists on the server, if not, kill it */
-        /*this.baddies.forEach(baddie => { // If it does, update its params
+        this.baddies.forEach(baddie => { // If it does, update its params
             if (baddiesList[baddie.id]) {
+                /*
                 baddie.x = baddiesList[baddie.id].xPos;
                 baddie.y = baddiesList[baddie.id].yPos;
                 baddie.health = baddiesList[baddie.id].health;
+                */
                 //console.log(baddiesList[baddie.id].closest);
                 //console.log(baddie.x + ' ' + baddie.y + ' ' + baddie.health);
+                baddie.targetPlayerId = baddiesList[baddie.id].targetPlayerId;
+                //console.log(Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y));
+                if (Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y) < 100) {
+                    
+                    if (baddiesList[baddie.id].targetPlayerId) {
+                        //do nothing cause im st00pid - gabe
+                    } else {
+                        this.game.client.baddieTargetPlayer(baddie.id);
+                        baddie.targetPlayerId = this.game.client.socket.id;
+                    }
+                }
             } else {
                 baddie.kill();
                 baddie.destroy();
@@ -387,8 +403,7 @@ export default class Dungeon extends Phaser.State {
                 // It's in the client, and I'm scared of null being false
                 // TODO: Test !null
             } else {
-                this.createBaddie(baddiesList[id]);
-                this.game.client.receivedBaddie(baddiesList[id]);
+                this.game.client.receivedBaddie(baddiesList[id], this);
             }
         });
     }

@@ -48,6 +48,10 @@ export default class Client {
         this.socket.emit('updateBaddie', baddieData);
     };
 
+    baddieTargetPlayer(baddieId) {
+        this.socket.emit('targetPlayer', baddieId, this.socket.id);
+    }
+
     testFunc() {
         this.socket.emit('test', "Test Went Thru");
     };
@@ -60,8 +64,11 @@ export default class Client {
         this.socket.emit('playerMoved', playerData);
     };
 
-    receivedBaddie(baddieData) {
-        this.socket.emit('receivedBaddie', baddieData);
+    receivedBaddie(baddieData, self) {
+        this.socket.emit('receivedBaddie', baddieData, () => {
+            console.log("got here");
+            self.createBaddie(baddieData);
+        });
     };
 
     itemCollected(itemId) {
