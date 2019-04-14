@@ -16,7 +16,7 @@ app.get('/', function (req, res) {
 
 // Start listening
 server.listen(8081, () => {
-    server.clientUpdateRate = 1000 / 60; // Rate at which update packets are sent
+    server.clientUpdateRate = 1000 / 30; // Rate at which update packets are sent
     server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
@@ -126,9 +126,14 @@ io.on('connection', (client) => {
                 console.log("Baddie " + baddie.id + " defeated");
             }
         } else {
-            package.dungeons[dungeonName].baddies[baddie.id].xPos = baddie.xPos;
-            package.dungeons[dungeonName].baddies[baddie.id].yPos = baddie.yPos;
-            package.dungeons[dungeonName].baddies[baddie.id].health = baddie.health;
+            if (package.dungeons[dungeonName].baddies[baddie.id]) {
+                package.dungeons[dungeonName].baddies[baddie.id].xPos = baddie.xPos;
+                package.dungeons[dungeonName].baddies[baddie.id].yPos = baddie.yPos;
+                package.dungeons[dungeonName].baddies[baddie.id].health = baddie.health;
+            } else {
+                console.log("Baddie's already been killed... :/");
+            }
+
         }
         if (baddieDebug) {
             console.log(package.dungeons[dungeonName].baddies[baddie.id]);
@@ -208,7 +213,7 @@ io.on('connection', (client) => {
                 }
             };
 
-            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 9000);
+            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 4000);
         }
     });
 

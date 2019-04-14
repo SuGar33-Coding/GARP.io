@@ -308,7 +308,6 @@ export default class Dungeon extends Phaser.State {
         this.baddies.add(baddie);
         //this.game.physics.arcade.enable(this.baddies)
         //this.actors.add(baddie)
-
     }
 
     /**
@@ -408,6 +407,7 @@ export default class Dungeon extends Phaser.State {
                 // It's in the client, and I'm scared of null being false
                 // TODO: Test !null
             } else {
+                this.createBaddie(baddiesList[id]);
                 this.game.client.receivedBaddie(baddiesList[id], this);
             }
         });

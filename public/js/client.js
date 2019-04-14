@@ -66,7 +66,7 @@ export default class Client {
 
     receivedBaddie(baddieData, self) {
         this.socket.emit('receivedBaddie', baddieData, () => {
-            self.createBaddie(baddieData);
+            
         });
     };
 
