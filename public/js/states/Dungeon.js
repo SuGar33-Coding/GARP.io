@@ -164,13 +164,9 @@ export default class Dungeon extends Phaser.State {
 
     update() {
         // Collision
-        this.game.physics.arcade.collide(this.actors, this.wallLayer, () => {
-            //console.log("something collided with wall");
-        });
-        this.game.physics.arcade.collide(this.actors, this.actors, () => {
-            //console.log("some idiots collided");
-        });
-        //this.game.physics.arcade.collide(this.player, this.baddies);
+        this.game.physics.arcade.collide(this.player, this.wallLayer);
+        this.game.physics.arcade.collide(this.baddies, this.wallLayer);
+        this.game.physics.arcade.collide(this.player, this.baddies);
         this.game.physics.arcade.overlap(this.player, this.items, this.collect, null, this);
 
         /* Handle moving player */
@@ -198,7 +194,7 @@ export default class Dungeon extends Phaser.State {
 
         /* Handle moving baddies */
         this.baddies.forEach(baddie => {
-            if(baddie.targetPlayerId == this.game.client.socket.id){
+            if (baddie.targetPlayerId == this.game.client.socket.id) {
                 // if(baddie.x < this.player.x){baddie.body.velocity.x += speed/2;}
                 // else{baddie.body.velocity.x -= speed/2;}
 
@@ -208,7 +204,15 @@ export default class Dungeon extends Phaser.State {
 
                 this.sendBaddieData(baddie);
             }
-        },this);
+
+            this.otherPlayers.forEach(otherPlayer => {
+                if (baddie.targetPlayerId == otherPlayer.id) {
+                    this.game.physics.arcade.moveToObject(baddie, otherPlayer);
+
+                    this.sendBaddieData(baddie);
+                }
+            });
+        }, this);
     }
 
     createItems() {
@@ -294,6 +298,7 @@ export default class Dungeon extends Phaser.State {
      * @param {*} baddieData JSON sent from the server containing all necessary baddie data
      */
     createBaddie(baddieData) {
+        console.log("Creating baddie: " + baddieData.id);
         let baddie = this.add.sprite(baddieData.xPos, baddieData.yPos, 'baddie');
         baddie.anchor.setTo(.5);
         baddie.health = baddieData.health;
@@ -303,7 +308,7 @@ export default class Dungeon extends Phaser.State {
         this.baddies.add(baddie);
         //this.game.physics.arcade.enable(this.baddies)
         //this.actors.add(baddie)
-        
+
     }
 
     /**
@@ -381,7 +386,7 @@ export default class Dungeon extends Phaser.State {
                 baddie.targetPlayerId = baddiesList[baddie.id].targetPlayerId;
                 //console.log(Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y));
                 if (Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y) < 100) {
-                    
+
                     if (baddiesList[baddie.id].targetPlayerId) {
                         //do nothing cause im st00pid - gabe
                     } else {
@@ -441,7 +446,7 @@ export default class Dungeon extends Phaser.State {
             baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer')[0],
             itemsArray: itemsArray
         }
-        
+
         this.game.client.tryCreateDungeon(mapData);
     }
 
