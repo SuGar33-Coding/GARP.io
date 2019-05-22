@@ -380,13 +380,11 @@ export default class Dungeon extends Phaser.State {
                 baddie.y = baddiesList[baddie.id].yPos;
                 baddie.health = baddiesList[baddie.id].health;
                 */
-                //console.log(baddiesList[baddie.id].closest);
-                //console.log(baddie.x + ' ' + baddie.y + ' ' + baddie.health);
                 baddie.targetPlayerId = baddiesList[baddie.id].targetPlayerId;
-                //console.log(Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y));
                 if (Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y) < 100) {
 
                     if (baddiesList[baddie.id].targetPlayerId) {
+                        //TODO: learn more about boolean evals in JS
                         //do nothing cause im st00pid - gabe
                     } else {
                         this.game.client.baddieTargetPlayer(baddie.id);
