@@ -4,10 +4,6 @@ export default class Dungeon extends Phaser.State {
     constructor() {
         super();
         this.spriteScale = 1;
-        /* Initializing client here to pass it the Dungeon.this */
-        //game.client = new Client(this);
-        //console.log(this);
-        //console.log("Dungeon constructor ran");
     }
 
     create() {
@@ -52,7 +48,6 @@ export default class Dungeon extends Phaser.State {
 
         // =========Dealing with other players=======
         this.otherPlayers = this.add.group();
-        //console.log(this.otherPlayers);
 
         // =========Dealing with baddie==============
         this.baddies = this.add.group();
@@ -62,19 +57,14 @@ export default class Dungeon extends Phaser.State {
         /* set spawn point */
         this.baddieSpawnPoint = this.findObjectsByType('enemy', this.map, 'objectLayer');
 
-        //this.enemy = this.add.sprite(this.baddieSpawnPoint[0].x, this.baddieSpawnPoint[0].y, 'baddie');
-        //this.enemy.anchor.setTo(.5);
-        //this.enemy.health = 30;
-
         // =========Instantiating groups=============
 
         /* Group containing all bodies that collide with the world and eachother */
-        this.actors = this.game.add.group();
+        this.actors = this.game.add.group(); // actors collide with other actors and walls
         this.actors.add(this.player);
-        this.actors.add(this.otherPlayers);
-        //this.actors.add(this.baddies);
+        this.actors.add(this.otherPlayers); // groups are recursive
 
-        this.items = this.game.add.group();
+        this.items = this.game.add.group(); // picked up by players
         this.items.enableBody = true;
 
         // =========Misc=============================
@@ -82,6 +72,7 @@ export default class Dungeon extends Phaser.State {
 
         this.cursors = this.game.input.keyboard.createCursorKeys();
 
+        /* set up movement from wasd */
         this.wasd = {
             up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
             down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
@@ -89,6 +80,7 @@ export default class Dungeon extends Phaser.State {
             right: this.game.input.keyboard.addKey(Phaser.Keyboard.D)
         }
 
+        /* handle player attacking with spear */
         this.game.input.onDown.add(function () {
             var angleInRad = this.game.physics.arcade.angleToPointer(this.player)
 
@@ -132,13 +124,11 @@ export default class Dungeon extends Phaser.State {
                 this.spear.y = -this.player.height / 2;
                 this.sendPlayerData()
             }
-
             this.game.time.events.add(50, function () {
                 this.game.physics.arcade.overlap(this.spear, this.baddies, this.damage, () => {
                     return !this.spear.exhausted;
                 }, this);
             }, this);
-
             this.game.time.events.add(300, function () {
                 this.spear.angle = 0;
                 this.spear.x = 10;
@@ -149,13 +139,10 @@ export default class Dungeon extends Phaser.State {
             //this.attack.destroy();
         }, this);
 
-
-        //this.createItems();
-
+        /* Initialize score */
         this.score = this.add.text(0, 0, "Score: 0", {
             fill: "#ffffff"
         });
-
         this.score.fixedToCamera = true;
         this.score.cameraOffset.setTo(20, 20);
 
@@ -164,7 +151,7 @@ export default class Dungeon extends Phaser.State {
     }
 
     update() {
-        // Collision
+        /* Collision */
         this.game.physics.arcade.collide(this.player, this.wallLayer);
         this.game.physics.arcade.collide(this.baddies, this.wallLayer);
         this.game.physics.arcade.collide(this.player, this.baddies);
@@ -192,37 +179,6 @@ export default class Dungeon extends Phaser.State {
         if (this.player.positon !== this.player.previousPosition) {
             this.game.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
         }
-
-        /* Handle moving baddies */
-        // this.baddies.forEach(baddie => {
-        //     if (baddie.targetPlayerId == this.game.client.socket.id) {
-        //         this.game.physics.arcade.moveToObject(baddie, this.player);
-
-        //         this.sendBaddieData(baddie);
-        //     } else {
-
-        //     }
-
-        //     this.otherPlayers.forEach(otherPlayer => {
-        //         if (baddie.targetPlayerId == otherPlayer.id) {
-        //             this.game.physics.arcade.moveToObject(baddie, otherPlayer);
-
-        //             this.sendBaddieData(baddie);
-        //         }
-        //     });
-        // }, this);
-    }
-
-    createItems() {
-        this.items = this.game.add.group();
-        this.items.enableBody = true;
-
-        var item;
-        let result = this.findObjectsByType('item', this.map, 'objectLayer');
-        console.log(result);
-        result.forEach(function (element) {
-            this.createFromTiledObject(element, this.items);
-        }, this);
     }
 
     damage(weapon, attacked) {
@@ -374,8 +330,6 @@ export default class Dungeon extends Phaser.State {
         this.baddies.forEach(baddie => { // If it does, update its params
             if (baddiesList[baddie.id]) {
 
-                // baddie.health = baddiesList[baddie.id].health;
-
                 /* Handle moving the baddie the case of being the target or someone else being the target */
                 baddie.targetPlayerId = baddiesList[baddie.id].targetPlayerId;
                 if (baddie.targetPlayerId == this.game.client.socket.id) {
@@ -385,7 +339,7 @@ export default class Dungeon extends Phaser.State {
                     baddie.x = baddiesList[baddie.id].xPos;
                     baddie.y = baddiesList[baddie.id].yPos;
                 }
-                /* Setting the targeted player within the distance */
+                /* Setting the targeted player when within the distance */
                 if (Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y) < 100) {
 
                     if (baddiesList[baddie.id].targetPlayerId) {
@@ -396,7 +350,7 @@ export default class Dungeon extends Phaser.State {
                         baddie.targetPlayerId = this.game.client.socket.id;
                     }
                 }
-            } else {
+            } else { // baddie is stale/ded
                 baddie.kill();
                 baddie.destroy();
                 this.baddies.remove(baddie);
@@ -404,7 +358,6 @@ export default class Dungeon extends Phaser.State {
         });
         /* Checks if global server-side baddie is on client yet, if not, add it */
         Object.keys(baddiesList).forEach(id => {
-            //console.log(this.baddiesExist);
             if (this.baddiesExist.has(id)) {
                 // It's in the client, and I'm scared of null being false
                 // TODO: Figure out JS bool evals

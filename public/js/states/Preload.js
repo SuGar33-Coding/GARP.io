@@ -31,15 +31,4 @@ export default class Preload extends Phaser.State {
     create() {
         this.state.start('MainMenu');
     }
-
-    findObjectsByType(type, map, layer) {
-        var result = new Array();
-        map.objects[layer].forEach(function (element) {
-            if (element.type === type) {
-                element.y -= map.tileHeight;
-                result.push(element);
-            }
-        });
-        return result;
-    }
 };
