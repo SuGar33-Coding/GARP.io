@@ -23,7 +23,7 @@ server.listen(8081, () => {
 });
 
 // ===========Websocket Stuff==============
-var serverDebug = true;
+var serverDebug = false;
 var playerDebug = false; //TODO: Something in here is broken lol
 var baddieDebug = false;
 var itemsDebug = false;
@@ -113,6 +113,7 @@ io.on('connection', (client) => {
     client.on('receivedBaddie', (baddie, callback) => {
         package.dungeons[dungeonName].baddies[baddie.id].instances[client.id] = true;
         if (baddieDebug) {
+            console.log("Client", client.id, 'received:')
             console.log(package.dungeons[dungeonName].baddies[baddie.id]);
         };
         callback();
@@ -131,13 +132,15 @@ io.on('connection', (client) => {
                 package.dungeons[dungeonName].baddies[baddie.id].yPos = baddie.yPos;
                 package.dungeons[dungeonName].baddies[baddie.id].health = baddie.health;
             } else {
-                console.log("Baddie's already been killed... :/");
+                if (baddieDebug) {
+                    console.log("Baddie's already been killed... :/");
             }
-
+                }
+                
         }
-        if (baddieDebug) {
-            console.log(package.dungeons[dungeonName].baddies[baddie.id]);
-        }
+        // if (baddieDebug) {
+        //     console.log(package.dungeons[dungeonName].baddies[baddie.id]);
+        // }
     });
 
     client.on('itemCollected', itemId => {
