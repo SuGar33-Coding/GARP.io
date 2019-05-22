@@ -57,6 +57,7 @@ export default class Dungeon extends Phaser.State {
         // =========Dealing with baddie==============
         this.baddies = this.add.group();
         this.game.physics.arcade.enable(this.baddies);
+        this.baddiesExist = new Set();
 
         /* set spawn point */
         this.baddieSpawnPoint = this.findObjectsByType('enemy', this.map, 'objectLayer');
@@ -193,26 +194,23 @@ export default class Dungeon extends Phaser.State {
         }
 
         /* Handle moving baddies */
-        this.baddies.forEach(baddie => {
-            if (baddie.targetPlayerId == this.game.client.socket.id) {
-                // if(baddie.x < this.player.x){baddie.body.velocity.x += speed/2;}
-                // else{baddie.body.velocity.x -= speed/2;}
+        // this.baddies.forEach(baddie => {
+        //     if (baddie.targetPlayerId == this.game.client.socket.id) {
+        //         this.game.physics.arcade.moveToObject(baddie, this.player);
 
-                // if(baddie.y < this.player.y){baddie.body.velocity.y += speed/2;}
-                // else{baddie.body.velocity.y -= speed/2;}
-                this.game.physics.arcade.moveToObject(baddie, this.player);
+        //         this.sendBaddieData(baddie);
+        //     } else {
 
-                this.sendBaddieData(baddie);
-            }
+        //     }
 
-            this.otherPlayers.forEach(otherPlayer => {
-                if (baddie.targetPlayerId == otherPlayer.id) {
-                    this.game.physics.arcade.moveToObject(baddie, otherPlayer);
+        //     this.otherPlayers.forEach(otherPlayer => {
+        //         if (baddie.targetPlayerId == otherPlayer.id) {
+        //             this.game.physics.arcade.moveToObject(baddie, otherPlayer);
 
-                    this.sendBaddieData(baddie);
-                }
-            });
-        }, this);
+        //             this.sendBaddieData(baddie);
+        //         }
+        //     });
+        // }, this);
     }
 
     createItems() {
@@ -375,12 +373,19 @@ export default class Dungeon extends Phaser.State {
         /* Checks if client-side baddie exists on the server, if not, kill it */
         this.baddies.forEach(baddie => { // If it does, update its params
             if (baddiesList[baddie.id]) {
-                /*
-                baddie.x = baddiesList[baddie.id].xPos;
-                baddie.y = baddiesList[baddie.id].yPos;
-                baddie.health = baddiesList[baddie.id].health;
-                */
+
+                // baddie.health = baddiesList[baddie.id].health;
+
+                /* Handle moving the baddie the case of being the target or someone else being the target */
                 baddie.targetPlayerId = baddiesList[baddie.id].targetPlayerId;
+                if (baddie.targetPlayerId == this.game.client.socket.id) {
+                    this.game.physics.arcade.moveToObject(baddie, this.player);
+                    this.sendBaddieData(baddie);
+                } else {
+                    baddie.x = baddiesList[baddie.id].xPos;
+                    baddie.y = baddiesList[baddie.id].yPos;
+                }
+                /* Setting the targeted player within the distance */
                 if (Phaser.Math.distance(baddie.x, baddie.y, this.player.x, this.player.y) < 100) {
 
                     if (baddiesList[baddie.id].targetPlayerId) {
@@ -399,12 +404,12 @@ export default class Dungeon extends Phaser.State {
         });
         /* Checks if global server-side baddie is on client yet, if not, add it */
         Object.keys(baddiesList).forEach(id => {
-            //console.log(id.instances);
-            //console.log(client.socket.id);
-            if (baddiesList[id].instances[this.game.client.socket.id]) {
+            //console.log(this.baddiesExist);
+            if (this.baddiesExist.has(id)) {
                 // It's in the client, and I'm scared of null being false
-                // TODO: Test !null
+                // TODO: Figure out JS bool evals
             } else {
+                this.baddiesExist.add(id);
                 this.createBaddie(baddiesList[id]);
                 this.game.client.receivedBaddie(baddiesList[id], this);
             }
