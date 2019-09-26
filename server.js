@@ -16,7 +16,7 @@ app.get('/', function (req, res) {
 
 // Start listening
 server.listen(8081, () => {
-    server.clientUpdateRate = 1000 / 30; // Rate at which update packets are sent
+    server.clientUpdateRate = 1000 / 60; // Rate at which update packets are sent
     server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
@@ -216,7 +216,7 @@ io.on('connection', (client) => {
                 }
             };
 
-            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 4000);
+            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 10000);
         }
     });
 
