@@ -27,6 +27,7 @@ var serverDebug = false;
 var playerDebug = false; //TODO: Something in here is broken lol
 var baddieDebug = false;
 var itemsDebug = false;
+var continuousBaddieSpawn = false; // Continuously spawn baddies in the spawn area at a random interval
 
 /* The update package to be sent every update */
 var package = {
@@ -190,20 +191,20 @@ io.on('connection', (client) => {
 
             // move all the updatepacket info to under the map and add player to map on entry
             let testBaddieId = uniqid('baddie-');
-            // package.dungeons[mapName].baddies[testBaddieId] = {
-            //     id: testBaddieId,
-            //     xPos: package.dungeons[mapData.name].baddieSpawnPoint.x,
-            //     yPos: package.dungeons[mapData.name].baddieSpawnPoint.y,
-            //     health: 30,
-            //     targetPlayerId: "",
-            //     instances: {} // List of clients that have received this baddie
-            // }
+            package.dungeons[mapName].baddies[testBaddieId] = {
+                id: testBaddieId,
+                xPos: package.dungeons[mapData.name].baddieSpawnPoint.x,
+                yPos: package.dungeons[mapData.name].baddieSpawnPoint.y,
+                health: 30,
+                targetPlayerId: "",
+                instances: {} // List of clients that have received this baddie
+            }
 
             var generateRandomBaddies = () => {
                 let testBaddieId = uniqid('baddie-');
                 package.dungeons[mapName].baddies[testBaddieId] = {
                     id: testBaddieId,
-                    xPos: package.dungeons[mapData.name].baddieSpawnPoint.x + Math.random() * 100,
+                    xPos: package.dungeons[mapData.name].baddieSpawnPoint.x + Math.random() * 100, // wiggle around the spawn area
                     yPos: package.dungeons[mapData.name].baddieSpawnPoint.y + Math.random() * 100,
                     health: 30,
                     targetPlayerId: "",
@@ -216,7 +217,9 @@ io.on('connection', (client) => {
                 }
             };
 
-            package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 10000);
+            if (continuousBaddieSpawn) {
+                package.dungeons[mapData.name].baddieInterval = setRandomizedInterval(generateRandomBaddies, 10000);
+            }
         }
     });
 
