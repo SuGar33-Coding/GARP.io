@@ -73,8 +73,9 @@ function create() {
             //console.log(self.scores.blue);
         }
         self.star.setPosition(randomPosition(700), randomPosition(500));
-        io.emit('updateScore', self.scores);
-        io.emit('starLocation', { x: self.star.x, y: self.star.y });
+        io.to(window.roomName).emit('updateScore', self.scores);
+        io.to(window.roomName).emit('starLocation', { x: self.star.x, y: self.star.y });
+        // TODO: MAKE EVERYTHING LIKE THIS ^ I GUESS
     });
 
     // io.on('connection', function (socket) {

@@ -37,20 +37,35 @@ function setupAuthoritativePhaser(roomName) {
             instances[roomName] = game;
             console.log(Object.keys(instances));
         };
+        // inject socketIO into the Phaser instance
         dom.window.io = io;
+        // send the uniq room name to the Phaser instance
+        dom.window.roomName = roomName;
     }).catch((error) => {
         console.log(error.message);
     });
 }
 
+// create two hard-coded test rooms with unique names
 var name1 = uniqid("room-");
 setupAuthoritativePhaser(name1);
 var name2 = uniqid("room-");
 setupAuthoritativePhaser(name2);
+// test counter
+var counter = 0
 
 io.on('connection', function (socket) {
-    let roomName = name2;
+    let roomName;
+
+    // simulate multi room joinging
+    if (counter < 2) {
+        roomName = name1;
+        counter += 1;
+    } else {
+        roomName = name2;
+    }
     let game = instances[roomName];
+    socket.join(roomName);
     console.log('a user connected to room: ' + roomName);
     // create a new player and add it to our clients object
     game.clients[socket.id] = {
@@ -65,13 +80,12 @@ io.on('connection', function (socket) {
             up: false
         }
     };
-    console.log("list of clients: " + Object.keys(game.clients));
     // add player to server
     game.addPlayer(game, socket.id);
     // send the clients object to the new player
     socket.emit('currentPlayers', game.clients);
     // update all other players of the new player
-    socket.broadcast.emit('newPlayer', game.clients[socket.id]);
+    socket.broadcast.to(roomName).emit('newPlayer', game.clients[socket.id]);
     // send the star object to the new player
     socket.emit('starLocation', { x: game.star.x, y: game.star.y });
     // send the current scores
