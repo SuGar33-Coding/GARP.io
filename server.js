@@ -27,7 +27,7 @@ var serverDebug = false;
 var playerDebug = false; //TODO: Something in here is broken lol
 var baddieDebug = false;
 var itemsDebug = false;
-var continuousBaddieSpawn = false; // Continuously spawn baddies in the spawn area at a random interval
+var continuousBaddieSpawn = true; // Continuously spawn baddies in the spawn area at a random interval
 
 /* The update package to be sent every update */
 var package = {
