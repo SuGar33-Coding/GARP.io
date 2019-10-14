@@ -8,10 +8,10 @@ const setRandomizedInterval = require('randomized-interval');
 
 // ===========Server Stuff=================
 // Request routing
-app.use(express.static(__dirname + '/public'));
+//app.use(express.static(__dirname + '../public'));
 
 app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/index.html');
+    res.sendFile(__dirname + '../public/index.html');
 });
 
 // Start listening
@@ -22,7 +22,11 @@ server.listen(8081, () => {
     console.log(`Address should be: http://localhost:${server.address().port}`);
 });
 
-// ===========Websocket Stuff==============
+
+// ===========Authoritative Game Loop=======
+
+
+// ===========Websocket Stuff===============
 var serverDebug = false;
 var playerDebug = false; //TODO: Something in here is broken lol
 var baddieDebug = false;
