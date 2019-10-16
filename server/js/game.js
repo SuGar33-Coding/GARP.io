@@ -34,7 +34,7 @@ function create() {
         player.setMaxVelocity(200);
         player.playerId = playerInfo;
         self.players.add(player);
-    }
+    };
 
     this.handlePlayerInput = function (self, playerId, input) {
         self.players.getChildren().forEach((player) => {
@@ -42,7 +42,7 @@ function create() {
                 this.clients[player.playerId].input = input;
             }
         });
-    }
+    };
 
     this.removePlayer = function (self, playerId) {
         self.players.getChildren().forEach((player) => {
@@ -50,7 +50,7 @@ function create() {
                 player.destroy();
             }
         });
-    }
+    };
 
     this.clients = {};
     const self = this;
