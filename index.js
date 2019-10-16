@@ -56,6 +56,7 @@ setupAuthoritativePhaser(name2);
 var counter = 0;
 
 io.on('connection', function (socket) {
+    let clients;
     let roomName;
 
     // simulate multi room joinging
@@ -65,11 +66,15 @@ io.on('connection', function (socket) {
     } else {
         roomName = name2;
     }
+    // get the phaser instance, including its functions
     let game = instances[roomName];
+    // get list of clients for this instance (only need to know about other clients in the same game instance)
+    clients = game.clients;
+    // join the socketIO room for the instance
     socket.join(roomName);
-    console.log('a user connected to room: ' + roomName);
-    // create a new player and add it to our clients object
-    game.clients[socket.id] = {
+    console.log('User ' + socket.id + ' connected to room: ' + roomName);
+    // create a new player and add it to clients
+    clients[socket.id] = {
         rotation: 0,
         x: Math.floor(Math.random() * 700) + 50,
         y: Math.floor(Math.random() * 500) + 50,
@@ -84,22 +89,23 @@ io.on('connection', function (socket) {
     // add player to server
     game.addPlayer(game, socket.id);
     // send the clients object to the new player
-    socket.emit('currentPlayers', game.clients);
+    socket.emit('currentPlayers', clients);
     // update all other players of the new player
-    socket.broadcast.to(roomName).emit('newPlayer', game.clients[socket.id]);
+    socket.broadcast.to(roomName).emit('newPlayer', clients[socket.id]);
     // send the star object to the new player
     socket.emit('starLocation', { x: game.star.x, y: game.star.y });
     // send the current scores
     socket.emit('updateScore', game.scores);
 
     socket.on('disconnect', function () {
-        console.log('user disconnected');
+        console.log('User ' + socket.id + ' disconnected');
         // remove player from server
         game.removePlayer(game, socket.id);
         // remove this player from our players object
-        delete game.clients[socket.id];
-        // emit a message to all players to remove this player
-        io.emit('disconnect', socket.id);
+        delete clients[socket.id];
+        // emit a message to all players in instance to remove this player
+        // TODO: check if this doesnt break anything
+        io.to(roomName).emit('disconnect', socket.id);
     });
 
     // when a player moves, update the player data
