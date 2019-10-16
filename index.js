@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 const path = require('path');
 const jsdom = require('jsdom');
 const express = require('express');
@@ -52,7 +53,7 @@ setupAuthoritativePhaser(name1);
 var name2 = uniqid("room-");
 setupAuthoritativePhaser(name2);
 // test counter
-var counter = 0
+var counter = 0;
 
 io.on('connection', function (socket) {
     let roomName;

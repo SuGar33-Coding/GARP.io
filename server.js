@@ -1,4 +1,5 @@
 
+/*jshint esversion: 6 */
 const express = require('express');
 const app = express();
 const server = require('http').Server(app);
@@ -52,7 +53,7 @@ io.on('connection', (client) => {
     if (serverDebug) {
         console.log("Connection with ID: " + client.id);
         client.emit('check', ("Check yoself " + client.id));
-    };
+    }
 
     client.on('joinDungeon', (name, callback) => {
         if (package.dungeons[name]) {
@@ -72,14 +73,14 @@ io.on('connection', (client) => {
             xPosSpear: playerData.xPosSpear,
             yPosSpear: playerData.yPosSpear,
             angleSpear: playerData.angleSpear
-        }
+        };
 
         package.dungeons[dungeonName].players[client.id] = player;
         package.dungeons[dungeonName].newborn = false; // Our little babby server ain't a kid no more :')
         if (playerDebug) {
             console.log("Player list: ");
             console.log(package.dungeons[dungeonName].players);
-        };
+        }
     });
 
     client.on('playerMoved', (playerData) => {
@@ -98,12 +99,12 @@ io.on('connection', (client) => {
                 xPosSpear: playerData.xPosSpear,
                 yPosSpear: playerData.yPosSpear,
                 angleSpear: playerData.angleSpear
-            }
+            };
             package.dungeons[dungeonName].players[client.id] = player;
             if (playerDebug) {
                 console.log("Player list: ");
                 console.log(package.dungeons[dungeonName].players);
-            };
+            }
         }
     });
 
@@ -118,9 +119,9 @@ io.on('connection', (client) => {
     client.on('receivedBaddie', (baddie, callback) => {
         package.dungeons[dungeonName].baddies[baddie.id].instances[client.id] = true;
         if (baddieDebug) {
-            console.log("Client", client.id, 'received:')
+            console.log("Client", client.id, 'received:');
             console.log(package.dungeons[dungeonName].baddies[baddie.id]);
-        };
+        }
         callback();
     });
 
@@ -175,7 +176,7 @@ io.on('connection', (client) => {
                 items: {},
                 score: 0,
                 newborn: true // Used for auto-closing dungeons upon the last remianing player leaving
-            }
+            };
 
             mapData.itemsArray.forEach(item => {
                 let id = uniqid("item-");
@@ -202,7 +203,7 @@ io.on('connection', (client) => {
                 health: 30,
                 targetPlayerId: "",
                 instances: {} // List of clients that have received this baddie
-            }
+            };
 
             var generateRandomBaddies = () => {
                 let testBaddieId = uniqid('baddie-');
@@ -213,11 +214,10 @@ io.on('connection', (client) => {
                     health: 30,
                     targetPlayerId: "",
                     instances: {}
-                }
+                };
                 if (baddieDebug) {
-                    console.log("Baddie " + package.dungeons[mapName].baddies[testBaddieId].id + " spawned at: "
-                        + package.dungeons[mapName].baddies[testBaddieId].xPos
-                        + ", " + package.dungeons[mapName].baddies[testBaddieId].yPos);
+                    console.log("Baddie " + package.dungeons[mapName].baddies[testBaddieId].id 
+                                + " spawned at: " + package.dungeons[mapName].baddies[testBaddieId].xPos + ", " + package.dungeons[mapName].baddies[testBaddieId].yPos);
                 }
             };
 
@@ -231,7 +231,7 @@ io.on('connection', (client) => {
         if (package.dungeons) {
             if (serverDebug) {
                 console.log("Sending: " + Object.keys(package.dungeons));
-            };
+            }
             callback(Object.keys(package.dungeons));
         } else {
             callback("No servers available");

@@ -1,3 +1,4 @@
+/*jshint esversion: 6 */
 var config = {
     type: Phaser.AUTO,
     parent: 'phaser-example',
