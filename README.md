@@ -9,3 +9,7 @@ To run for yourself:
 `npm install`
 
 `npm start`
+
+## Screenshots
+
+![Early Dev Screenshot](https://i.imgur.com/nOwdhrk.png)
