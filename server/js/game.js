@@ -75,19 +75,19 @@ function create() {
     // <--------------------------------------------------->
 
     this.addPlayer = (self, playerInfo) => {
-        let player = self.add.sprite(self.playerStarts[0].x, self.playerStarts[0].y, 'player');
-        player.anchor.setTo(.5);
-        player.scale.setTo(self.spriteScale);
-        player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
+        let player = self.add.sprite(self.playerSpawnPoints[0].x, self.playerSpawnPoints[0].y, 'player');
+        // player.anchor.setTo(.5);
+        // player.scale.setTo(self.spriteScale);
+        // player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
         player.playerId = playerInfo.playerId;
-        player.body.collideWorldBounds = true; // in case they cheat and get out of the walls
+        // player.body.collideWorldBounds = true; // in case they cheat and get out of the walls
         //self.game.physics.arcade.enable(player);
 
         /* Teh SP34R */
-        player.spear = player.addChild(self.make.sprite(10, 0, 'spear'));
-        player.spear.exhausted = false; // A bool to check if it has already delt its desired damage after being used 
+        // player.spear = player.addChild(self.make.sprite(10, 0, 'spear'));
+        // player.spear.exhausted = false; // A bool to check if it has already delt its desired damage after being used 
         //game.physics.arcade.enable(player.spear);
-        player.spear.anchor.setTo(.5);
+        // player.spear.anchor.setTo(.5);
 
         self.players.add(player);
     };
@@ -95,9 +95,9 @@ function create() {
     this.addBaddie = (self, baddieInfo) => {
         console.log("Creating baddie: " + baddieInfo.id);
         let baddie = this.add.sprite(self.baddieSpawnPoints.x, self.baddieSpawnPoints.y, 'baddie');
-        baddie.anchor.setTo(.5);
-        baddie.health = 30;
-        baddie.id = baddieInfo.id;
+        // baddie.anchor.setTo(.5);
+        // baddie.health = 30;
+        // baddie.id = baddieInfo.id;
         //baddie.targetPlayerId = baddieData.targetPlayerId;
 
         //this.game.physics.arcade.enable(baddie);

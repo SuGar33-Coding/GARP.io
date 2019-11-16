@@ -1,4 +1,4 @@
-import game from "./ClientGame.js/index.js"
+import game from "./ClientGame.js"
 
 export default class Client {
     constructor(dungeonState) {

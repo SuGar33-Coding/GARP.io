@@ -1,4 +1,4 @@
-import game from "../ClientGame.js/index.js"
+//import game from "../ClientGame.js/index.js"
 
 export default class Dungeon extends Phaser.State {
     constructor() {
