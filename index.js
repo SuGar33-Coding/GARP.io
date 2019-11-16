@@ -92,7 +92,7 @@ io.on('connection', socket => {
         }
     };
     // add player to server
-    game.addPlayer(game, socket.id);
+    game.addPlayer(game, clients[socket.id]);
     // send the clients object to the new player
     socket.emit('currentPlayers', clients);
     // update all other players of the new player
@@ -120,19 +120,22 @@ io.on('connection', socket => {
     });
 });
 
+// server.sendUpdate = () => {
+//     // For every dungeon, for each baddie in that dungeon, find the player that the baddie is closest to
+//     // TODO: Only change this on player move rather than in sendUpdate
+//     Object.keys(package.dungeons).forEach(roomName => {
+
+//         io.to(roomName).emit('update', package.dungeons[roomName]);
+//     });
+// };
+
+server.setUpdateLoop = () => {
+    setInterval(server.sendUpdate, server.clientUpdateRate);
+};
+
 server.listen(8082, () => {
     server.clientUpdateRate = 1000 / 15; // Rate at which update packets are sent
     //server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
 });
-
-server.sendUpdate = () => {
-
-    // For every dungeon, for each baddie in that dungeon, find the player that the baddie is closest to
-    // TODO: Only change this on player move rather than in sendUpdate
-    Object.keys(package.dungeons).forEach(roomName => {
-
-        io.to(roomName).emit('update', package.dungeons[roomName]);
-    });
-};

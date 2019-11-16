@@ -33,7 +33,7 @@ function create() {
         player.setDrag(100);
         player.setAngularDrag(100);
         player.setMaxVelocity(200);
-        player.playerId = playerInfo;
+        player.playerId = playerInfo.playerId;
         self.players.add(player);
     };
 
