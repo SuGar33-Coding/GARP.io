@@ -39,7 +39,9 @@ function setupAuthoritativePhaser(roomName) {
         dom.window.gameLoaded = (game) => {
             // add created game to isntances
             instances[roomName] = game;
-            console.log(Object.keys(instances));
+            //console.log(Object.keys(instances));
+            // add a test baddie
+            game.addBaddie(game, { id: uniqid('baddie-') });
         };
         // inject socketIO into the Phaser instance
         dom.window.io = io;
@@ -53,8 +55,8 @@ function setupAuthoritativePhaser(roomName) {
 // create two hard-coded test rooms with unique names
 var name1 = uniqid("room-");
 setupAuthoritativePhaser(name1);
-var name2 = uniqid("room-");
-setupAuthoritativePhaser(name2);
+// var name2 = uniqid("room-");
+// setupAuthoritativePhaser(name2);
 // test counter
 var counter = 0;
 
@@ -76,29 +78,33 @@ io.on('connection', socket => {
     // join the socketIO room for the instance
     socket.join(roomName);
     console.log('User ' + socket.id + ' connected to room: ' + roomName);
-    // create a new player and add it to clients
+    // create a new empty player and add it to clients
     clients[socket.id] = {
-        rotation: 0,
-        // Place player in random location
-        // TODO: Link spawn locations to map spawn points
-        x: Math.floor(Math.random() * 700) + 50,
-        y: Math.floor(Math.random() * 500) + 50,
+        xPos: 0,
+        yPos: 0,
         playerId: socket.id,
-        team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
         input: {
             left: false,
             right: false,
-            up: false
-        }
+            up: false,
+            down: false
+        },
+        xPosSpear: 0,
+        yPosSpear: 0,
+        angleSpear: 0
     };
     // add player to server
     game.addPlayer(game, clients[socket.id]);
+
     // send the clients object to the new player
     socket.emit('currentPlayers', clients);
+
     // update all other players of the new player
     socket.broadcast.to(roomName).emit('newPlayer', clients[socket.id]);
+
     // send the star object to the new player
     socket.emit('starLocation', { x: game.star.x, y: game.star.y });
+
     // send the current scores
     socket.emit('updateScore', game.scores);
     // TODO: Send all the data for baddies, treasures, and other objects for GARP
@@ -115,8 +121,13 @@ io.on('connection', socket => {
     });
 
     // when a player moves, takes in a json that tells it what key is pressed down, then updates the player data
-    socket.on('playerInput', function (inputData) {
-        game.handlePlayerInput(game, socket.id, inputData);
+    socket.on('playerMovement', inputData => {
+        game.handlePlayerMovement(game, socket.id, inputData);
+    });
+
+    // same for when a player attacks
+    socket.on('playerAttack', inputData => {
+        game.handlePlayerAttack(game, socket.id, inputData);
     });
 });
 
