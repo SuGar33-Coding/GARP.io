@@ -1,6 +1,11 @@
 import game from "./game.js"
 
 export default class Client {
+    /**
+     * Sets the phaser state for this client and
+     * open the initial websocket connection
+     * @param {Phaser.State} dungeonState 
+     */
     constructor(dungeonState) {
         this.state = dungeonState;
         this.socket = io.connect({reconnection: false});
