@@ -53,8 +53,9 @@ function setupAuthoritativePhaser(roomName) {
 // create two hard-coded test rooms with unique names
 var name1 = uniqid("room-");
 setupAuthoritativePhaser(name1);
-var name2 = uniqid("room-");
-setupAuthoritativePhaser(name2);
+
+// var name2 = uniqid("room-");
+// setupAuthoritativePhaser(name2);
 // test counter
 var counter = 0;
 

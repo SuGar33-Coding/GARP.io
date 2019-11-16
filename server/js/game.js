@@ -2,23 +2,22 @@
 //const players = {};
 
 const config = {
-    type: Phaser.HEADLESS,
-    parent: 'phaser-example',
+    renderer: Phaser.HEADLESS,
+    parent: 'phaser-parent',
     width: 800,
     height: 600,
-    physics: {
+    physicsConfig: {
         default: 'arcade',
         arcade: {
             debug: false,
             gravity: { y: 0 }
         }
     },
-    scene: {
+    state: {
         preload: preload,
         create: create,
         update: update
-    },
-    autoFocus: false
+    }
 };
 
 function preload() {
@@ -44,11 +43,12 @@ function preload() {
 
 // create sets up all functions that game.js will provide to index.js
 function create() {
+    console.log("got to create");
     // ======Setting up the map=============
 
-    this.disconnectTimer = setTimeout(() => {
-        console.log("Well that escalated quickly");
-    }, 2000);
+    // this.disconnectTimer = setTimeout(() => {
+    //     console.log("Well that escalated quickly");
+    // }, 2000);
 
     // Adds a tilemap object to the phaser game so that phaser can read from it
     this.map = this.game.add.tilemap('dungeon');
@@ -60,29 +60,118 @@ function create() {
     this.backgroundlayer = this.map.createLayer('backgroundLayer');
     this.wallLayer = this.map.createLayer('wallLayer');
 
-    // Do not need as client no longer checks collision
-    // this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
+    this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
 
     this.backgroundlayer.resizeWorld();
+
+    // =======Players========
+    this.spriteScale = 1;
+
+    this.playerSpawnPoints = findObjectsByType('playerStart', this.map, 'objectLayer');
+    this.baddieSpawnPoints = findObjectsByType('enemy', this.map, 'objectLayer');
 
     // <--------------------------------------------------->
 
     this.addPlayer = (self, playerInfo) => {
-        let player = self.physics.add.image(playerInfo.x, playerInfo.y, 'ship').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
-        player.setDrag(100);
-        player.setAngularDrag(100);
-        player.setMaxVelocity(200);
+        let player = self.add.sprite(self.playerStarts[0].x, self.playerStarts[0].y, 'player');
+        player.anchor.setTo(.5);
+        player.scale.setTo(self.spriteScale);
+        player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
         player.playerId = playerInfo.playerId;
+        player.body.collideWorldBounds = true; // in case they cheat and get out of the walls
+        //self.game.physics.arcade.enable(player);
+
+        /* Teh SP34R */
+        player.spear = player.addChild(self.make.sprite(10, 0, 'spear'));
+        player.spear.exhausted = false; // A bool to check if it has already delt its desired damage after being used 
+        //game.physics.arcade.enable(player.spear);
+        player.spear.anchor.setTo(.5);
+
         self.players.add(player);
     };
 
-    this.handlePlayerInput = function (self, playerId, input) {
+    this.addBaddie = (self, baddieInfo) => {
+        console.log("Creating baddie: " + baddieInfo.id);
+        let baddie = this.add.sprite(self.baddieSpawnPoints.x, self.baddieSpawnPoints.y, 'baddie');
+        baddie.anchor.setTo(.5);
+        baddie.health = 30;
+        baddie.id = baddieInfo.id;
+        //baddie.targetPlayerId = baddieData.targetPlayerId;
+
+        //this.game.physics.arcade.enable(baddie);
+        self.baddies.add(baddie);
+        //this.game.physics.arcade.enable(this.baddies)
+        //this.actors.add(baddie)
+    };
+
+    this.handlePlayerMovement = function (self, playerId, input) {
         self.players.getChildren().forEach((player) => {
             if (playerId === player.playerId) {
                 this.clients[player.playerId].input = input;
             }
         });
     };
+
+    this.handlePlayerAttack = (self, playerId, input) => {
+        let angleInRad = input;
+        self.players.getChildren().forEach((player) => {
+            if (playerId === player.playerId) {
+                // Changing sprite positioning being moved to server side
+                if ((angleInRad >= -0.3926991) && (angleInRad <= 0.3926991)) { // Attack to the right
+                    player.spear.angle = 90;
+                    player.spear.x = (player.width / 2);
+                    player.spear.y = 0;
+                } else if ((angleInRad > .3926991) && (angleInRad <= 1.178097)) { // Attack bottom right
+                    player.spear.angle = 135;
+                    player.spear.x = player.width / 2;
+                    player.spear.y = player.height / 2;
+                } else if ((angleInRad > 1.178097) && (angleInRad <= 1.9634954)) { // Attack Down
+                    player.spear.angle = 180;
+                    player.spear.x = 0;
+                    player.spear.y = player.height / 2;
+                } else if ((angleInRad > 1.9634954) && (angleInRad <= 2.7488936)) { // Attack Bottom left
+                    player.spear.angle = 225;
+                    player.spear.x = -player.width / 2;
+                    player.spear.y = player.height / 2;
+                } else if ((angleInRad > 2.7488936) || (angleInRad <= -2.7488936)) { // Attack Left
+                    player.spear.angle = 270;
+                    player.spear.x = -player.width / 2;
+                    player.spear.y = 0;
+                } else if ((angleInRad > -2.7488936) && (angleInRad <= -1.9634954)) { // Attack Top Left
+                    player.spear.angle = 315;
+                    player.spear.x = -player.width / 2;
+                    player.spear.y = -player.height / 2;
+                } else if ((angleInRad > -1.9634954) && (angleInRad <= -1.178097)) { // Attack Up
+                    player.spear.x = 0;
+                    player.spear.y = -player.height / 2;
+                } else if ((angleInRad > -1.178097) && (angleInRad <= -0.3926991)) { // Attack top right
+                    player.spear.angle = 45;
+                    player.spear.x = player.width / 2;
+                    player.spear.y = -player.height / 2;
+                }
+
+                self.game.time.events.add(50, () => {
+                    self.game.physics.arcade.overlap(player.spear, self.baddies, self.damage, () => {
+                        return !player.spear.exhausted;
+                    }, self);
+                }, self);
+                self.game.time.events.add(300, () => {
+                    player.spear.angle = 0;
+                    player.spear.x = 10;
+                    player.spear.y = 0;
+                    player.spear.exhausted = false;
+                }, self);
+            }
+        });
+
+
+    };
+
+    this.damage = (weapon, attacked) => {
+        weapon.exhausted = true;
+        attacked.damage(10);
+        console.log(attacked.id + ": " + attacked.health);
+    }
 
     this.removePlayer = function (self, playerId) {
         self.players.getChildren().forEach((player) => {
@@ -96,6 +185,7 @@ function create() {
     const self = this;
     this.message = 0;
     this.players = this.physics.add.group();
+    this.baddies = this.physics.add.group();
 
     this.scores = {
         blue: 0,
@@ -124,28 +214,42 @@ function update() {
     this.players.getChildren().forEach((player) => {
         const input = this.clients[player.playerId].input;
         if (input.left) {
-            player.setAngularVelocity(-300);
-        } else if (input.right) {
-            player.setAngularVelocity(300);
-        } else {
-            player.setAngularVelocity(0);
+            player.body.velocity.x = -120;
         }
-
+        if (input.right) {
+            player.body.velocity.x = 120
+        }
         if (input.up) {
-            this.physics.velocityFromRotation(player.rotation + 1.5, 200, player.body.acceleration);
-        } else {
-            player.setAcceleration(0);
+            player.body.velocity.y = -120;
+        }
+        if (input.down) {
+            player.body.velocity.y = 120;
         }
 
-        this.clients[player.playerId].x = player.x;
-        this.clients[player.playerId].y = player.y;
-        this.clients[player.playerId].rotation = player.rotation;
+        // this.clients[player.playerId].x = player.x;
+        // this.clients[player.playerId].y = player.y;
     });
-    this.physics.world.wrap(this.players, 5);
 }
 
 function randomPosition(max) {
     return Math.floor(Math.random() * max) + 50;
+}
+
+/**
+     * Returns an array of objects of type 'type' from specified layer
+     * @param {*} type 
+     * @param {*} map 
+     * @param {*} layer 
+     */
+function findObjectsByType(type, map, layer) {
+    var result = new Array();
+    map.objects[layer].objects.forEach(function (element) {
+        if (element.type === type) {
+            element.y -= map.tileHeight;
+            result.push(element);
+        }
+    });
+    return result;
 }
 
 const game = new Phaser.Game(config);
