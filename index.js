@@ -19,6 +19,8 @@ app.get('/', (req, res) => {
 
 var instances = {};
 
+
+// Sets up headless phaser to be able to run on the server with just a name
 function setupAuthoritativePhaser(roomName) {
     JSDOM.fromFile(path.join(__dirname, 'server/index.html'), {
         // To run the scripts in the html file
@@ -77,6 +79,8 @@ io.on('connection', socket => {
     // create a new player and add it to clients
     clients[socket.id] = {
         rotation: 0,
+        // Place player in random location
+        // TODO: Link spawn locations to map spawn points
         x: Math.floor(Math.random() * 700) + 50,
         y: Math.floor(Math.random() * 500) + 50,
         playerId: socket.id,
@@ -97,6 +101,7 @@ io.on('connection', socket => {
     socket.emit('starLocation', { x: game.star.x, y: game.star.y });
     // send the current scores
     socket.emit('updateScore', game.scores);
+    // TODO: Send all the data for baddies, treasures, and other objects for GARP
 
     socket.on('disconnect', () => {
         console.log('User ' + socket.id + ' disconnected');
@@ -109,8 +114,8 @@ io.on('connection', socket => {
         io.to(roomName).emit('disconnect', socket.id);
     });
 
-    // when a player moves, update the player data
-    socket.on('playerInput', inputData => {
+    // when a player moves, takes in a json that tells it what key is pressed down, then updates the player data
+    socket.on('playerInput', function (inputData) {
         game.handlePlayerInput(game, socket.id, inputData);
     });
 });

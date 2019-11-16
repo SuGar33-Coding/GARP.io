@@ -26,6 +26,7 @@ function preload() {
     this.load.image('star', 'assets/star_gold.png');
 }
 
+// create sets up all functions that game.js will provide to index.js
 function create() {
     this.addPlayer = function (self, playerInfo) {
         const player = self.physics.add.image(playerInfo.x, playerInfo.y, 'ship').setOrigin(0.5, 0.5).setDisplaySize(53, 40);
