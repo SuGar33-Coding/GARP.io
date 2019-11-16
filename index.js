@@ -13,7 +13,7 @@ const { JSDOM } = jsdom;
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
@@ -35,6 +35,7 @@ function setupAuthoritativePhaser(roomName) {
         };
         dom.window.URL.revokeObjectURL = (objectURL) => { };
         dom.window.gameLoaded = (game) => {
+            // add created game to isntances
             instances[roomName] = game;
             console.log(Object.keys(instances));
         };
@@ -55,11 +56,11 @@ setupAuthoritativePhaser(name2);
 // test counter
 var counter = 0;
 
-io.on('connection', function (socket) {
+io.on('connection', socket => {
     let clients;
     let roomName;
 
-    // simulate multi room joinging
+    // simulate multi room joining
     if (counter < 2) {
         roomName = name1;
         counter += 1;
@@ -97,7 +98,7 @@ io.on('connection', function (socket) {
     // send the current scores
     socket.emit('updateScore', game.scores);
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', () => {
         console.log('User ' + socket.id + ' disconnected');
         // remove player from server
         game.removePlayer(game, socket.id);
@@ -109,12 +110,12 @@ io.on('connection', function (socket) {
     });
 
     // when a player moves, update the player data
-    socket.on('playerInput', function (inputData) {
+    socket.on('playerInput', inputData => {
         game.handlePlayerInput(game, socket.id, inputData);
     });
 });
 
-server.listen(8082, function () {
+server.listen(8082, () => {
     server.clientUpdateRate = 1000 / 15; // Rate at which update packets are sent
     //server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
