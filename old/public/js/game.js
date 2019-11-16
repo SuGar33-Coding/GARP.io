@@ -20,6 +20,7 @@ class Game extends Phaser.Game {
 
 /* For storing the client and Phaser game properties */
 const game = new Game();
+// construct a new Client object and set as a property of game
 game.client = new Client(game.dungeonState);
 export default game;
 

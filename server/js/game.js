@@ -33,7 +33,7 @@ function create() {
         player.setDrag(100);
         player.setAngularDrag(100);
         player.setMaxVelocity(200);
-        player.playerId = playerInfo;
+        player.playerId = playerInfo.playerId;
         self.players.add(player);
     };
 
@@ -75,52 +75,7 @@ function create() {
             //console.log(self.scores.blue);
         }
         self.star.setPosition(randomPosition(700), randomPosition(500));
-        io.to(window.roomName).emit('updateScore', self.scores);
-        io.to(window.roomName).emit('starLocation', { x: self.star.x, y: self.star.y });
-        // TODO: MAKE EVERYTHING LIKE THIS ^ I GUESS
     });
-
-    // io.on('connection', function (socket) {
-    //     console.log('a user connected');
-    //     // create a new player and add it to our players object
-    //     players[socket.id] = {
-    //         rotation: 0,
-    //         x: Math.floor(Math.random() * 700) + 50,
-    //         y: Math.floor(Math.random() * 500) + 50,
-    //         playerId: socket.id,
-    //         team: (Math.floor(Math.random() * 2) == 0) ? 'red' : 'blue',
-    //         input: {
-    //             left: false,
-    //             right: false,
-    //             up: false
-    //         }
-    //     };
-    //     // add player to server
-    //     addPlayer(self, players[socket.id]);
-    //     // send the players object to the new player
-    //     socket.emit('currentPlayers', players);
-    //     // update all other players of the new player
-    //     socket.broadcast.emit('newPlayer', players[socket.id]);
-    //     // send the star object to the new player
-    //     socket.emit('starLocation', { x: self.star.x, y: self.star.y });
-    //     // send the current scores
-    //     socket.emit('updateScore', self.scores);
-
-    //     socket.on('disconnect', function () {
-    //         console.log('user disconnected');
-    //         // remove player from server
-    //         removePlayer(self, socket.id);
-    //         // remove this player from our players object
-    //         delete players[socket.id];
-    //         // emit a message to all players to remove this player
-    //         io.emit('disconnect', socket.id);
-    //     });
-
-    //     // when a player moves, update the player data
-    //     socket.on('playerInput', function (inputData) {
-    //         handlePlayerInput(self, socket.id, inputData);
-    //     });
-    // });
 
     window.gameLoaded(this);
 }
@@ -148,7 +103,6 @@ function update() {
         this.clients[player.playerId].rotation = player.rotation;
     });
     this.physics.world.wrap(this.players, 5);
-    io.emit('playerUpdates', this.clients);
 }
 
 function randomPosition(max) {

@@ -13,7 +13,7 @@ const { JSDOM } = jsdom;
 
 app.use(express.static(__dirname + '/public'));
 
-app.get('/', function (req, res) {
+app.get('/', (req, res) => {
     res.sendFile(__dirname + '/index.html');
 });
 
@@ -37,6 +37,7 @@ function setupAuthoritativePhaser(roomName) {
         };
         dom.window.URL.revokeObjectURL = (objectURL) => { };
         dom.window.gameLoaded = (game) => {
+            // add created game to isntances
             instances[roomName] = game;
             console.log(Object.keys(instances));
         };
@@ -57,11 +58,11 @@ setupAuthoritativePhaser(name2);
 // test counter
 var counter = 0;
 
-io.on('connection', function (socket) {
+io.on('connection', socket => {
     let clients;
     let roomName;
 
-    // simulate multi room joinging
+    // simulate multi room joining
     if (counter < 2) {
         roomName = name1;
         counter += 1;
@@ -91,7 +92,7 @@ io.on('connection', function (socket) {
         }
     };
     // add player to server
-    game.addPlayer(game, socket.id);
+    game.addPlayer(game, clients[socket.id]);
     // send the clients object to the new player
     socket.emit('currentPlayers', clients);
     // update all other players of the new player
@@ -102,7 +103,7 @@ io.on('connection', function (socket) {
     socket.emit('updateScore', game.scores);
     // TODO: Send all the data for baddies, treasures, and other objects for GARP
 
-    socket.on('disconnect', function () {
+    socket.on('disconnect', () => {
         console.log('User ' + socket.id + ' disconnected');
         // remove player from server
         game.removePlayer(game, socket.id);
@@ -119,19 +120,23 @@ io.on('connection', function (socket) {
     });
 });
 
-server.listen(8082, function () {
-    server.clientUpdateRate = 1000 / 15; // Rate at which update packets are sent
-    //server.setUpdateLoop();
+server.sendUpdate = () => {
+    // TODO: Bundle all these updates into one update package
+    Object.keys(instances).forEach(roomName => {
+        let game = instances[roomName];
+        io.to(roomName).emit('playerUpdates', game.clients);
+        io.to(roomName).emit('updateScore', game.scores);
+        io.to(roomName).emit('starLocation', { x: game.star.x, y: game.star.y });
+    });
+};
+
+server.setUpdateLoop = () => {
+    setInterval(server.sendUpdate, server.clientUpdateRate);
+};
+
+server.listen(8082, () => {
+    server.clientUpdateRate = 1000 / 40; // Rate at which update packets are sent
+    server.setUpdateLoop();
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
 });
-
-server.sendUpdate = () => {
-
-    // For every dungeon, for each baddie in that dungeon, find the player that the baddie is closest to
-    // TODO: Only change this on player move rather than in sendUpdate
-    Object.keys(package.dungeons).forEach(roomName => {
-
-        io.to(roomName).emit('update', package.dungeons[roomName]);
-    });
-};
