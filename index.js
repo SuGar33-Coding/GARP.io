@@ -1,7 +1,8 @@
 /*jshint esversion: 6 */
 const readline = require('readline').createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
+    prompt: 'GARPio CLI > '
 });
 
 const path = require('path');
@@ -160,28 +161,26 @@ server.listen(8082, () => {
 
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
-    
-    // Start CLI recursion
-    server.promptForInput();
+
+    // Start CLI prompt
+    readline.prompt();
 });
 
-server.promptForInput = () => {
-    // List of defined inputs for CLI
-    let inputs = {
-        secret: () => console.log(`You found the secret! UwU xD *nuzzles you*`),
-        clients: () => console.log(`Connected clients: ${JSON.stringify(Array.from(connectedClients))}`),
-        help: () => console.log(inputs)
-    };
-    readline.question(`> `, input => {
-        // Try to run the named function from user input
-        try {
-            inputs[input]();
-        } catch (error) {
-            console.log(`'${input}' is not a valid input`);
-        }
-        
-        // TODO: Maybe figure out how to make this not infinitely recursive
-        // readline.close();
-        server.promptForInput();
-      });
+/* ==========Define CLI========== */
+
+// List of defined inputs for CLI
+let inputs = {
+    secret: () => console.log(`You found the secret! UwU xD *nuzzles you*`),
+    clients: () => console.log(`Connected clients: ${JSON.stringify(Array.from(connectedClients))}`),
+    help: () => console.log(inputs)
 };
+
+readline.on('line', input => {
+    // Try to run the named function from user input
+    try {
+        inputs[input]();
+    } catch (error) {
+        console.log(`'${input}' is not a valid input`);
+    }
+    readline.prompt();
+});
