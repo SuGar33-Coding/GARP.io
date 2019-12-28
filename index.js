@@ -1,4 +1,9 @@
 /*jshint esversion: 6 */
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
 const path = require('path');
 const jsdom = require('jsdom');
 const express = require('express');
@@ -18,7 +23,7 @@ app.get('/', (req, res) => {
 });
 
 var instances = {};
-
+var connectedClients = new Set();
 
 // Sets up headless phaser to be able to run on the server with just a name
 function setupAuthoritativePhaser(roomName) {
@@ -61,6 +66,7 @@ setupAuthoritativePhaser(name1);
 var counter = 0;
 
 io.on('connection', socket => {
+    connectedClients.add(socket.id);
     let clients;
     let roomName;
 
@@ -110,6 +116,7 @@ io.on('connection', socket => {
     // TODO: Send all the data for baddies, treasures, and other objects for GARP
 
     socket.on('disconnect', () => {
+        connectedClients.delete(socket.id);
         console.log('User ' + socket.id + ' disconnected');
         // remove player from server
         game.removePlayer(game, socket.id);
@@ -147,7 +154,34 @@ server.setUpdateLoop = () => {
 
 server.listen(8082, () => {
     server.clientUpdateRate = 1000 / 40; // Rate at which update packets are sent
+
+    // Start the update loop
     server.setUpdateLoop();
+
     console.log(`Listening on ${server.address().port}`);
     console.log(`Address should be: http://localhost:${server.address().port}`);
+    
+    // Start CLI recursion
+    server.promptForInput();
 });
+
+server.promptForInput = () => {
+    // List of defined inputs for CLI
+    let inputs = {
+        secret: () => console.log(`You found the secret! UwU xD *nuzzles you*`),
+        clients: () => console.log(`Connected clients: ${JSON.stringify(Array.from(connectedClients))}`),
+        help: () => console.log(inputs)
+    };
+    readline.question(`> `, input => {
+        // Try to run the named function from user input
+        try {
+            inputs[input]();
+        } catch (error) {
+            console.log(`'${input}' is not a valid input`);
+        }
+        
+        // TODO: Maybe figure out how to make this not infinitely recursive
+        // readline.close();
+        server.promptForInput();
+      });
+};
