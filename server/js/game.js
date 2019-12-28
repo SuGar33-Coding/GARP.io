@@ -22,7 +22,7 @@ const config = {
 };
 
 function preload() {
-    console.log("got to preload");
+    // console.log("got to preload");
     // Load tilemap stuff 
     this.load.image('player', 'assets/sprites/Player2.png');
     this.load.image('attack', 'assets/sprites/attack.png');
@@ -45,7 +45,7 @@ function preload() {
 
 // create sets up all functions that game.js will provide to index.js
 function create() {
-    console.log("got to create");
+    // console.log("got to create");
     // ======Setting up the map=============
 
     // this.disconnectTimer = setTimeout(() => {
