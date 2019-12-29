@@ -117,7 +117,7 @@ io.on('connection', socket => {
 
     // send the current scores
     socket.emit('updateScore', game.scores);
-    // TODO: Send all the data for baddies, treasures, and other objects for GARP
+    // TODO: Send all the data for baddies, treasures, and other objects for the game
 
     socket.on('disconnect', () => {
         connectedClients.delete(socket.id);
@@ -177,6 +177,7 @@ server.listen(8082, () => {
 // List of defined inputs for CLI
 let inputs = {
     secret: () => console.log(`You found the secret! UwU xD *nuzzles you*`),
+    // TODO: make sure connectedClients variable is actually consistent
     clients: () => console.log(`Connected clients: ${JSON.stringify(Array.from(connectedClients))}`),
     instances: () => {
         let string = `[`;
