@@ -68,6 +68,7 @@ function create() {
 
     // =======Players========
     this.spriteScale = 1;
+
     // 0 in this function means objectLayer (and hopefully stays that way)
     this.playerSpawnPoints = findObjectsByType('playerStart', this.map, 0);
     this.baddieSpawnPoints = findObjectsByType('enemy', this.map, 0);
@@ -94,14 +95,14 @@ function create() {
 
     this.addBaddie = (self, baddieInfo) => {
         console.log("Creating baddie: " + baddieInfo.id);
-        let baddie = this.add.sprite(self.baddieSpawnPoints.x, self.baddieSpawnPoints.y, 'baddie');
+        let baddie = self.baddies.create(self.baddieSpawnPoints.x, self.baddieSpawnPoints.y, 'baddie');
+        baddie.name = baddieInfo.id;
         // baddie.anchor.setTo(.5);
         // baddie.health = 30;
-        // baddie.id = baddieInfo.id;
         //baddie.targetPlayerId = baddieData.targetPlayerId;
 
         //this.game.physics.arcade.enable(baddie);
-        self.baddies.add(baddie);
+        // self.baddies.add(baddie);
         //this.game.physics.arcade.enable(this.baddies)
         //this.actors.add(baddie)
     };
@@ -123,7 +124,7 @@ function create() {
                     player.spear.angle = 90;
                     player.spear.x = (player.width / 2);
                     player.spear.y = 0;
-                } else if ((angleInRad > .3926991) && (angleInRad <= 1.178097)) { // Attack bottom right
+                } else if ((angleInRad > 0.3926991) && (angleInRad <= 1.178097)) { // Attack bottom right
                     player.spear.angle = 135;
                     player.spear.x = player.width / 2;
                     player.spear.y = player.height / 2;
@@ -173,7 +174,7 @@ function create() {
         weapon.exhausted = true;
         attacked.damage(10);
         console.log(attacked.id + ": " + attacked.health);
-    }
+    };
 
     this.removePlayer = function (self, playerId) {
         self.players.getChildren().forEach((player) => {
@@ -219,7 +220,7 @@ function update() {
             player.body.velocity.x = -120;
         }
         if (input.right) {
-            player.body.velocity.x = 120
+            player.body.velocity.x = 120;
         }
         if (input.up) {
             player.body.velocity.y = -120;
@@ -244,7 +245,7 @@ function randomPosition(max) {
      * @param {*} layer 
      */
 function findObjectsByType(type, map, layer) {
-    var result = new Array();
+    var result = [];
     map.objects[layer].objects.forEach(function (element) {
         if (element.type === type) {
             element.y -= map.tileHeight;
