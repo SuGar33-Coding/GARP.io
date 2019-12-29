@@ -63,8 +63,11 @@ var name1 = uniqid("room-");
 setupAuthoritativePhaser(name1);
 // var name2 = uniqid("room-");
 // setupAuthoritativePhaser(name2);
+
 // test counter
 var counter = 0;
+
+/* ========Handle socket.io connections========= */
 
 io.on('connection', socket => {
     connectedClients.add(socket.id);
@@ -138,6 +141,8 @@ io.on('connection', socket => {
         game.handlePlayerAttack(game, socket.id, inputData);
     });
 });
+
+/* =========Configure and spin up server============= */
 
 server.sendUpdate = () => {
     // TODO: Bundle all these updates into one update package
