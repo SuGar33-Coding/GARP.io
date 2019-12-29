@@ -193,13 +193,14 @@ let inputs = {
             console.log(key);
             instances[key].baddies.children.entries.forEach(baddie => {
                 console.log('\t' + baddie.name);
-            })
+            });
         });
         console.log('=======');
     },
     help: () => console.log(inputs)
 };
 
+// defines handler for the event that a line is entered
 readline.on('line', input => {
     // Try to run the named function from user input
     try {

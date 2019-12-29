@@ -1,3 +1,4 @@
+/* jshint esversion: 6 */
 export default class ServerList extends Phaser.State {
 
     create() {
@@ -19,7 +20,7 @@ export default class ServerList extends Phaser.State {
 
         let refreshRoomsButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY+300, 'refreshButton', this.refreshRooms, this, 2, 1, 0);
         refreshRoomsButton.anchor.setTo(0.5);
-        refreshRoomsButton.scale.setTo(0.25,0.25)
+        refreshRoomsButton.scale.setTo(0.25,0.25);
 
         this.refreshRooms();
 
@@ -43,21 +44,21 @@ export default class ServerList extends Phaser.State {
         let map = this.game.add.tilemap('dungeon');
         map.addTilesetImage('DungeonSet', 'gameTiles');
 
-        let itemsArray = []
+        let itemsArray = [];
 
         this.findObjectsByType('item', map, 'objectLayer').forEach(itemData => {
             itemsArray.push({
                 xPos: itemData.x,
                 yPos: itemData.y,
                 properties: itemData.properties
-            })
+            });
         });
 
         let mapData = {
             name: dungeonName,
             baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer')[0],
             itemsArray: itemsArray
-        }
+        };
         
         this.game.client.tryCreateDungeon(mapData);
         this.refreshRooms();
@@ -86,7 +87,7 @@ export default class ServerList extends Phaser.State {
      * @param {*} layer 
      */
     findObjectsByType(type, map, layer) {
-        var result = new Array();
+        var result = [];
         map.objects[layer].forEach(function (element) {
             if (element.type === type) {
                 element.y -= map.tileHeight;

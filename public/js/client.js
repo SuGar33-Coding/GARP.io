@@ -1,4 +1,5 @@
-import game from "./ClientGame.js"
+/* jshint esversion: 6 */
+import game from "./ClientGame.js";
 
 export default class Client {
     constructor(dungeonState) {
@@ -6,7 +7,7 @@ export default class Client {
         this.socket = io.connect({reconnection: false});
 
         this.socket.on('check', (data) => {
-            console.log(data)
+            console.log(data);
         });
         this.socket.on('update', (updatePackage) => {
             this.state.updatePlayers(updatePackage.players);
@@ -15,7 +16,7 @@ export default class Client {
             this.state.updateScore(updatePackage.score);
             this.state.resetDisconnectTimeout();
         });
-    };
+    }
 
     joinDungeon(name) {
         this.socket.emit('joinDungeon', name, (enteredDungeon) => {
@@ -25,7 +26,7 @@ export default class Client {
                 alert("Dungeon does not exist");
             }
         });
-    };
+    }
 
     sendPlayer(x, y, xSpear, ySpear, angleSpear) {
         let playerData = {
@@ -34,9 +35,9 @@ export default class Client {
             xPosSpear: xSpear,
             yPosSpear: ySpear,
             angleSpear: angleSpear
-        }
+        };
         this.socket.emit('addPlayerToServer', playerData);
-    };
+    }
 
     sendAttack(directionInRad){
         this.socket.emit('playerAttack', directionInRad);
@@ -52,9 +53,9 @@ export default class Client {
             xPos: x,
             yPos: y,
             health: health
-        }
+        };
         this.socket.emit('updateBaddie', baddieData);
-    };
+    }
 
     baddieTargetPlayer(baddieId) {
         this.socket.emit('targetPlayer', baddieId, this.socket.id);
@@ -62,41 +63,41 @@ export default class Client {
 
     testFunc() {
         this.socket.emit('test', "Test Went Thru");
-    };
+    }
 
     enteredDungeon() {
         this.socket.emit('enterDungeon');
-    };
+    }
 
     playerMoved(playerData) {
         this.socket.emit('playerMoved', playerData);
-    };
+    }
 
     receivedBaddie(baddieData, self) {
         this.socket.emit('receivedBaddie', baddieData, () => {
             
         });
-    };
+    }
 
     itemCollected(itemId) {
         this.socket.emit('itemCollected', itemId);
-    };
+    }
 
     tryCreateDungeon(mapData) {
         this.socket.emit('instantiateDungeon', mapData, (msg) => {
             console.log(msg);
         });
-    };
+    }
 
     deleteDungeon(mapName) {
         this.socket.emit('closeDungeon', mapName, (msg) => {
             console.log(msg);
         });
-    };
+    }
 
     reqServers(self) {
         this.socket.emit('reqServers', "", (list) => {
             self.serverList.setText("Servers: " + list);
         });
-    };
-};
+    }
+}
