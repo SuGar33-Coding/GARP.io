@@ -178,6 +178,24 @@ server.listen(8082, () => {
 let inputs = {
     secret: () => console.log(`You found the secret! UwU xD *nuzzles you*`),
     clients: () => console.log(`Connected clients: ${JSON.stringify(Array.from(connectedClients))}`),
+    instances: () => {
+        let string = `[`;
+        Object.keys(instances).forEach(key => {
+            string += `'${key}', `;
+        });
+        string += ']';
+        console.log(`Instances: ${string}`);
+    },
+    instances_v: () => {
+        console.log('=======');
+        Object.keys(instances).forEach(key => {
+            console.log(key);
+            instances[key].baddies.children.entries.forEach(baddie => {
+                console.log('\t' + baddie.name);
+            })
+        });
+        console.log('=======');
+    },
     help: () => console.log(inputs)
 };
 
@@ -187,6 +205,7 @@ readline.on('line', input => {
         inputs[input]();
     } catch (error) {
         console.log(`'${input}' is not a valid input`);
+        console.log(error);
     }
     readline.prompt();
 });
