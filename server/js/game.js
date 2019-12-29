@@ -45,7 +45,6 @@ function preload() {
 
 // create sets up all functions that game.js will provide to index.js
 function create() {
-    // console.log("got to create");
     // ======Setting up the map=============
 
     // this.disconnectTimer = setTimeout(() => {
@@ -94,7 +93,7 @@ function create() {
     };
 
     this.addBaddie = (self, baddieInfo) => {
-        console.log("Creating baddie: " + baddieInfo.id);
+        // console.log("Creating baddie: " + baddieInfo.id);
         let baddie = self.baddies.create(self.baddieSpawnPoints.x, self.baddieSpawnPoints.y, 'baddie');
         baddie.name = baddieInfo.id;
         // baddie.anchor.setTo(.5);

@@ -27,7 +27,7 @@ var instances = {};
 var connectedClients = new Set();
 
 // Sets up headless phaser to be able to run on the server with just a name
-function setupAuthoritativePhaser(roomName) {
+function setupAuthoritativePhaser(roomName, id) {
     JSDOM.fromFile(path.join(__dirname, 'server/index.html'), {
         // To run the scripts in the html file
         runScripts: "dangerously",
@@ -43,9 +43,11 @@ function setupAuthoritativePhaser(roomName) {
         };
         dom.window.URL.revokeObjectURL = (objectURL) => { };
         dom.window.gameLoaded = (game) => {
-            // add created game to isntances
+            // add created game to instances
+            // TODO: use only name, and dissallow duplicate names (change CLI to reflect this)
             instances[roomName] = game;
-            //console.log(Object.keys(instances));
+            game.id = id;
+
             // add a test baddie
             game.addBaddie(game, { id: uniqid('baddie-') });
         };
@@ -59,8 +61,9 @@ function setupAuthoritativePhaser(roomName) {
 }
 
 // create two hard-coded test rooms with unique names
-var name1 = uniqid("room-");
-setupAuthoritativePhaser(name1);
+var id1 = uniqid("room-");
+var name1 = 'default';
+setupAuthoritativePhaser(name1, id1);
 // var name2 = uniqid("room-");
 // setupAuthoritativePhaser(name2);
 
@@ -71,53 +74,75 @@ var counter = 0;
 
 io.on('connection', socket => {
     connectedClients.add(socket.id);
+    let game;
     let clients;
-    let roomName;
 
     // simulate multi room joining
-    if (counter < 2) {
-        roomName = name1;
-        counter += 1;
-    } else {
-        roomName = name2;
-    }
-    // get the phaser instance, including its functions
-    let game = instances[roomName];
-    // get list of clients for this instance (only need to know about other clients in the same game instance)
-    clients = game.clients;
-    // join the socketIO room for the instance
-    socket.join(roomName);
-    console.log('User ' + socket.id + ' connected to room: ' + roomName);
-    // create a new empty player and add it to clients
-    clients[socket.id] = {
-        xPos: 0,
-        yPos: 0,
-        playerId: socket.id,
-        input: {
-            left: false,
-            right: false,
-            up: false,
-            down: false
-        },
-        xPosSpear: 0,
-        yPosSpear: 0,
-        angleSpear: 0
-    };
-    // add player to server
-    game.addPlayer(game, clients[socket.id]);
+    // if (counter < 2) {
+    //     roomName = name1;
+    //     counter += 1;
+    // } else {
+    //     roomName = name2;
+    // }
 
-    // send the clients object to the new player
-    socket.emit('currentPlayers', clients);
+    // when a player moves, takes in a json that tells it what key is pressed down, then updates the player data
+    socket.on('playerMovement', inputData => {
+        game.handlePlayerMovement(game, socket.id, inputData);
+    });
 
-    // update all other players of the new player
-    socket.broadcast.to(roomName).emit('newPlayer', clients[socket.id]);
+    // same for when a player attacks
+    socket.on('playerAttack', inputData => {
+        game.handlePlayerAttack(game, socket.id, inputData);
+    });
 
-    // send the star object to the new player
-    socket.emit('starLocation', { x: game.star.x, y: game.star.y });
+    // give list of instances to client
+    socket.on('reqServers', (foo, callback) => {
+        console.log(Object.keys(instances));
+        callback(Object.keys(instances));
+    });
 
-    // send the current scores
-    socket.emit('updateScore', game.scores);
-    // TODO: Send all the data for baddies, treasures, and other objects for the game
+    // try to put client in instance
+    socket.on('joinDungeon', (roomName, callback) => {
+        // get the phaser instance, including its functions
+        game = instances[roomName];
+        // get list of clients for this instance (only need to know about other clients in the same game instance)
+        clients = game.clients;
+        // join the socketIO room for the instance
+        socket.join(roomName);
+        // create a new empty player and add it to clients
+        clients[socket.id] = {
+            xPos: 0,
+            yPos: 0,
+            playerId: socket.id,
+            input: {
+                left: false,
+                right: false,
+                up: false,
+                down: false
+            },
+            xPosSpear: 0,
+            yPosSpear: 0,
+            angleSpear: 0
+        };
+        // add player to server
+        game.addPlayer(game, clients[socket.id]);
+
+        // send the clients object to the new player
+        socket.emit('currentPlayers', clients);
+
+        // update all other players of the new player
+        socket.broadcast.to(roomName).emit('newPlayer', clients[socket.id]);
+
+        // send the star object to the new player
+        socket.emit('starLocation', { x: game.star.x, y: game.star.y });
+
+        // send the current scores
+        socket.emit('updateScore', game.scores);
+        // TODO: Send all the data for baddies, treasures, and other objects for the game
+
+        console.log('User ' + socket.id + ' connected to room: ' + roomName);
+        callback(true);
+    });
 
     socket.on('disconnect', () => {
         connectedClients.delete(socket.id);
@@ -129,16 +154,6 @@ io.on('connection', socket => {
         // emit a message to all players in instance to remove this player
         // TODO: check if this doesnt break anything
         io.to(roomName).emit('disconnect', socket.id);
-    });
-
-    // when a player moves, takes in a json that tells it what key is pressed down, then updates the player data
-    socket.on('playerMovement', inputData => {
-        game.handlePlayerMovement(game, socket.id, inputData);
-    });
-
-    // same for when a player attacks
-    socket.on('playerAttack', inputData => {
-        game.handlePlayerAttack(game, socket.id, inputData);
     });
 });
 
@@ -179,18 +194,11 @@ let inputs = {
     secret: () => console.log(`You found the secret! UwU xD *nuzzles you*`),
     // TODO: make sure connectedClients variable is actually consistent
     clients: () => console.log(`Connected clients: ${JSON.stringify(Array.from(connectedClients))}`),
-    instances: () => {
-        let string = `[`;
-        Object.keys(instances).forEach(key => {
-            string += `'${key}', `;
-        });
-        string += ']';
-        console.log(`Instances: ${string}`);
-    },
+    instances: () => console.log(`Instances: ${Object.keys(instances)}`),
     instances_v: () => {
         console.log('=======');
         Object.keys(instances).forEach(key => {
-            console.log(key);
+            console.log(instances[key].id);
             instances[key].baddies.children.entries.forEach(baddie => {
                 console.log('\t' + baddie.name);
             });
