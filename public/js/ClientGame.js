@@ -32,6 +32,8 @@ var config = {
             gravity: { y: 0 }
         }
     },
+    // I recommend removing scenes from this and adding them back one by one when upgrading to Phaser 3
+    // NOTE: They are prioritzied in reverse order
     scene: [Dungeon, ServerList, MainMenu, Preload, Boot]
 };
 

@@ -21,7 +21,7 @@ export default class Client {
     joinDungeon(name) {
         this.socket.emit('joinDungeon', name, (enteredDungeon) => {
             if (enteredDungeon) {
-                this.scene.scene.swtich('ServerList');
+                this.scene.scene.switch('ServerList');
             } else {
                 alert("Dungeon does not exist");
             }

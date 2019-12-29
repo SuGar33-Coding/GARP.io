@@ -7,12 +7,9 @@ export default class Preload extends Phaser.Scene {
 	}
 
     preload() {
-        this.title = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'title');
-        this.title.anchor.setTo(0.5);
-        this.title.scale.setTo(2);
+        this.title = this.add.image(this.game.world.centerX, this.game.world.centerY, 'title');
 
-        this.loadbar = this.add.sprite(this.game.world.centerX, this.game.world.centerY + 128, 'loadbar');
-        this.loadbar.anchor.setTo(0.5);
+        this.loadbar = this.add.image(this.game.world.centerX, this.game.world.centerY + 128, 'loadbar');
 
         this.load.setPreloadSprite(this.loadbar);
 
@@ -37,6 +34,6 @@ export default class Preload extends Phaser.Scene {
     }
 
     create() {
-        this.scene.swtich('MainMenu');
+        this.scene.switch('MainMenu');
     }
 };

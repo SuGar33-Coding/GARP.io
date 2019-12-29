@@ -18,7 +18,7 @@ export default class MainMenu extends Phaser.Scene {
     }
 
     enterServerList() {
-        this.scene.swtich('ServerList');
+        this.scene.switch('ServerList');
     }
 }
 
