@@ -103,6 +103,12 @@ io.on('connection', socket => {
 
     // try to put client in instance
     socket.on('joinDungeon', (roomName, callback) => {
+        // if that server name doesn't exist
+        if (!instances[roomName]) {
+            callback(false);
+            return;
+        }
+
         // get the phaser instance, including its functions
         game = instances[roomName];
         // get list of clients for this instance (only need to know about other clients in the same game instance)
