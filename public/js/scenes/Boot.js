@@ -1,4 +1,11 @@
-export default class Boot extends Phaser.State {
+/* jshint esversion: 6 */
+export default class Boot extends Phaser.Scene {
+	constructor () {
+		super({
+			key: 'Boot',
+			active: true
+		});
+	}
 
 	preload() {
 		this.game.stage.smooth = false;
@@ -8,7 +15,7 @@ export default class Boot extends Phaser.State {
 
 	create() {
 
-		this.game.stage.backgroundColor = '#000';
+		// this.game.stage.backgroundColor = '#000';
 
 		this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 		this.scale.minWidth = 240;
@@ -23,10 +30,13 @@ export default class Boot extends Phaser.State {
 		//this.scale.setScreenSize(true);
 
 		//physics system for movement
-		this.game.physics.startSystem(Phaser.Physics.ARCADE);
+		// this.game.physics.startSystem(Phaser.Physics.ARCADE);
 
-		this.state.start('Preload');
+		// set the client info
+		this.game.client = this.scene.get('Dungeon');
+
+		this.scene.switch('Preload');
 	}
-};
+}
 
 // Set controls to wasd

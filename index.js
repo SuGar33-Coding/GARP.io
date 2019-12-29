@@ -104,7 +104,7 @@ io.on('connection', socket => {
     // try to put client in instance
     socket.on('joinDungeon', (roomName, callback) => {
         // if that server name doesn't exist
-        if (!instances[roomName]) {
+        if (!instances.hasOwnProperty(roomName)) {
             callback(false);
             return;
         }

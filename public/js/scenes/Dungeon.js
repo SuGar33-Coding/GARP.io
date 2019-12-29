@@ -1,8 +1,12 @@
+/* jshint esversion: 6 */
 //import game from "../ClientGame.js/index.js"
 
-export default class Dungeon extends Phaser.State {
+export default class Dungeon extends Phaser.Scene {
     constructor() {
-        super();
+        super({
+            key: 'Dungeon',
+            active: false
+        });
         this.spriteScale = 1;
     }
 
@@ -31,13 +35,11 @@ export default class Dungeon extends Phaser.State {
         // ========Dealing with spawning player===========
         /* Find spawn points labelled 'playerStart' on the tilemap and place the player sprite there */
         var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
-        this.player = this.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
-        this.player.anchor.setTo(.5);
+        this.player = this.physics.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
         this.player.scale.setTo(this.spriteScale);
         this.player.id = this.game.client.socket.id;
         this.player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
 
-        this.game.physics.arcade.enable(this.player);
         // Set Player Speed
         this.playerSpeed = 120;
         // Don't need to check collision

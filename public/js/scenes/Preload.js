@@ -1,4 +1,10 @@
-export default class Preload extends Phaser.State {
+export default class Preload extends Phaser.Scene {
+    constructor () {
+		super({
+			key: 'Preload',
+			active: false
+		});
+	}
 
     preload() {
         this.title = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'title');
@@ -31,6 +37,6 @@ export default class Preload extends Phaser.State {
     }
 
     create() {
-        this.state.start('MainMenu');
+        this.scene.swtich('MainMenu');
     }
 };

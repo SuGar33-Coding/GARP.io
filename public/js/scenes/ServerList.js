@@ -1,5 +1,11 @@
 /* jshint esversion: 6 */
-export default class ServerList extends Phaser.State {
+export default class ServerList extends Phaser.Scene {
+    constructor () {
+		super({
+			key: 'ServerList',
+			active: false
+		});
+	}
 
     create() {
         this.serverList = this.add.text(0, this.game.world.centerY-250, "Servers:", {

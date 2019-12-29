@@ -2,26 +2,26 @@
 import game from "./ClientGame.js";
 
 export default class Client {
-    constructor(dungeonState) {
-        this.state = dungeonState;
-        this.socket = io.connect({reconnection: false});
+    constructor(gameInstance) {
+        this.scene = gameInstance.scene.get('Dungeon');
+        this.socket = io.connect({ reconnection: false });
 
         this.socket.on('check', (data) => {
             console.log(data);
         });
         this.socket.on('update', (updatePackage) => {
-            this.state.updatePlayers(updatePackage.players);
-            this.state.updateBaddies(updatePackage.baddies);
-            this.state.refreshItems(updatePackage.items);
-            this.state.updateScore(updatePackage.score);
-            this.state.resetDisconnectTimeout();
+            this.scene.updatePlayers(updatePackage.players);
+            this.scene.updateBaddies(updatePackage.baddies);
+            this.scene.refreshItems(updatePackage.items);
+            this.scene.updateScore(updatePackage.score);
+            this.scene.resetDisconnectTimeout();
         });
     }
 
     joinDungeon(name) {
         this.socket.emit('joinDungeon', name, (enteredDungeon) => {
             if (enteredDungeon) {
-                game.state.start('Dungeon');
+                this.scene.scene.swtich('ServerList');
             } else {
                 alert("Dungeon does not exist");
             }
@@ -39,11 +39,11 @@ export default class Client {
         this.socket.emit('addPlayerToServer', playerData);
     }
 
-    sendAttack(directionInRad){
+    sendAttack(directionInRad) {
         this.socket.emit('playerAttack', directionInRad);
     }
 
-    sendMovement(movementJson){
+    sendMovement(movementJson) {
         this.socket.emit('playerMovement', movementJson);
     }
 
@@ -75,7 +75,7 @@ export default class Client {
 
     receivedBaddie(baddieData, self) {
         this.socket.emit('receivedBaddie', baddieData, () => {
-            
+
         });
     }
 

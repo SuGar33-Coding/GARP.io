@@ -1,4 +1,10 @@
-export default class MainMenu extends Phaser.State {
+export default class MainMenu extends Phaser.Scene {
+    constructor () {
+		super({
+			key: 'MainMenu',
+			active: false
+		});
+	}
 
     create() {
 
@@ -12,7 +18,7 @@ export default class MainMenu extends Phaser.State {
     }
 
     enterServerList() {
-        this.state.start('ServerList');
+        this.scene.swtich('ServerList');
     }
 }
 
