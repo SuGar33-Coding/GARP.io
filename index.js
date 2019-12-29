@@ -159,7 +159,8 @@ server.setUpdateLoop = () => {
 };
 
 server.listen(8082, () => {
-    server.clientUpdateRate = 1000 / 40; // Rate at which update packets are sent
+    // Rate at which update packets are sent
+    server.clientUpdateRate = 1000 / 40;
 
     // Start the update loop
     server.setUpdateLoop();
