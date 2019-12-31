@@ -27,7 +27,7 @@ var instances = {};
 var connectedClients = new Set();
 
 // Sets up headless phaser to be able to run on the server with just a name
-function setupAuthoritativePhaser(roomName, id) {
+function newPhaserInstance(roomName, id) {
     JSDOM.fromFile(path.join(__dirname, 'server/index.html'), {
         // To run the scripts in the html file
         runScripts: "dangerously",
@@ -44,38 +44,35 @@ function setupAuthoritativePhaser(roomName, id) {
         dom.window.URL.revokeObjectURL = (objectURL) => { };
         dom.window.gameLoaded = (game) => {
             // add created game to instances
-            // TODO: use only name, and dissallow duplicate names (change CLI to reflect this)
+            // TODO: get rid of id, and dissallow duplicate names (change CLI to reflect this)
             instances[roomName] = game;
             game.id = id;
 
             // add a test baddie
-            game.addBaddie(game, { id: uniqid('baddie-') });
+            game.addBaddie({ id: uniqid('baddie-') });
         };
         // inject socketIO into the Phaser instance
         dom.window.io = io;
-        // send the uniq room name to the Phaser instance
+        // inject the uniq room name into the Phaser instance
         dom.window.roomName = roomName;
     }).catch((error) => {
         console.log(error.message);
     });
 }
 
-// create two hard-coded test rooms with unique names
+// hard-coded test instance
 var id1 = uniqid("room-");
 var name1 = 'default';
-setupAuthoritativePhaser(name1, id1);
-// var name2 = uniqid("room-");
-// setupAuthoritativePhaser(name2);
-
-// test counter
-var counter = 0;
+newPhaserInstance(name1, id1);
 
 /* ========Handle socket.io connections========= */
 
 io.on('connection', socket => {
+    // Add client to global list for consistency
     connectedClients.add(socket.id);
+
     let game;
-    let clients;
+    let players;
 
     // simulate multi room joining
     // if (counter < 2) {
@@ -87,12 +84,12 @@ io.on('connection', socket => {
 
     // when a player moves, takes in a json that tells it what key is pressed down, then updates the player data
     socket.on('playerMovement', inputData => {
-        game.handlePlayerMovement(game, socket.id, inputData);
+        game.handlePlayerMovement(socket.id, inputData);
     });
 
     // same for when a player attacks
     socket.on('playerAttack', inputData => {
-        game.handlePlayerAttack(game, socket.id, inputData);
+        game.handlePlayerAttack(socket.id, inputData);
     });
 
     // give list of instances to client
@@ -101,7 +98,7 @@ io.on('connection', socket => {
         callback(Object.keys(instances));
     });
 
-    // try to put client in instance
+    // try to put client in instance and set up their game
     socket.on('joinDungeon', (roomName, callback) => {
         // if that server name doesn't exist
         if (!instances.hasOwnProperty(roomName)) {
@@ -111,12 +108,12 @@ io.on('connection', socket => {
 
         // get the phaser instance, including its functions
         game = instances[roomName];
-        // get list of clients for this instance (only need to know about other clients in the same game instance)
-        clients = game.clients;
-        // join the socketIO room for the instance
+        // get list of players by socket.io id in this instance
+        players = game.clients;
+        // join the socket.io room for this instance
         socket.join(roomName);
-        // create a new empty player and add it to clients
-        clients[socket.id] = {
+        // create a new default player object in players
+        players[socket.id] = {
             xPos: 0,
             yPos: 0,
             playerId: socket.id,
@@ -130,16 +127,16 @@ io.on('connection', socket => {
             yPosSpear: 0,
             angleSpear: 0
         };
-        // add player to server
-        game.addPlayer(game, clients[socket.id]);
+        // add player to server instance
+        game.addPlayer(players[socket.id]);
 
-        // send the clients object to the new player
-        socket.emit('currentPlayers', clients);
+        // send the players object to this client
+        socket.emit('currentPlayers', players);
 
         // update all other players of the new player
-        socket.broadcast.to(roomName).emit('newPlayer', clients[socket.id]);
+        socket.broadcast.to(roomName).emit('newPlayer', players[socket.id]);
 
-        // send the star object to the new player
+        // send the star object
         socket.emit('starLocation', { x: game.star.x, y: game.star.y });
 
         // send the current scores
@@ -154,9 +151,9 @@ io.on('connection', socket => {
         connectedClients.delete(socket.id);
         console.log('User ' + socket.id + ' disconnected');
         // remove player from server
-        game.removePlayer(game, socket.id);
+        game.removePlayer(socket.id);
         // remove this player from our players object
-        delete clients[socket.id];
+        delete players[socket.id];
         // emit a message to all players in instance to remove this player
         // TODO: check if this doesnt break anything
         io.to(roomName).emit('disconnect', socket.id);

@@ -3,7 +3,7 @@
 
 const config = {
     type: Phaser.HEADLESS,
-    parent: 'phaser-example',
+    parent: 'garp-canvas',
     width: 800,
     height: 600,
     physics: {
@@ -45,36 +45,17 @@ function preload() {
 
 // create sets up all functions that game.js will provide to index.js
 function create() {
-    // ======Setting up the map=============
+    // Declare this for consistent usage within function scopes
+    // (Use 'self' instead of 'this' when in a function block)
+    const self = this;
 
     // this.disconnectTimer = setTimeout(() => {
     //     console.log("Well that escalated quickly");
     // }, 2000);
 
-    // Adds a tilemap object to the phaser game so that phaser can read from it
-    this.map = this.make.tilemap({ key: 'dungeon' });
-    // Selects the tilemap you are using.  TODO: After multiple maps are created, select one of the maps.
-    this.tileset = this.map.addTilesetImage('DungeonSet', 'gameTiles');
+    /* ==========Define functions========== */
 
-    /* Sets background layer to layer called 'backgroundLayer' inside of the tilemap.
-       Should leave these the same for every map for consistency purposes. */
-    this.backgroundlayer = this.map.createStaticLayer('backgroundLayer', this.tileset, 0, 0);
-    this.wallLayer = this.map.createStaticLayer('wallLayer', this.tileset, 0, 0);
-
-    this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
-
-    //this.backgroundlayer.resizeWorld();
-
-    // =======Players========
-    this.spriteScale = 1;
-
-    // 0 in this function means objectLayer (and hopefully stays that way)
-    this.playerSpawnPoints = findObjectsByType('playerStart', this.map, 0);
-    this.baddieSpawnPoints = findObjectsByType('enemy', this.map, 0);
-
-    // <--------------------------------------------------->
-
-    this.addPlayer = (self, playerInfo) => {
+    this.addPlayer = (playerInfo) => {
         let player = self.add.sprite(self.playerSpawnPoints[0].x, self.playerSpawnPoints[0].y, 'player');
         // player.anchor.setTo(.5);
         // player.scale.setTo(self.spriteScale);
@@ -92,7 +73,7 @@ function create() {
         self.players.add(player);
     };
 
-    this.addBaddie = (self, baddieInfo) => {
+    this.addBaddie = (baddieInfo) => {
         // console.log("Creating baddie: " + baddieInfo.id);
         let baddie = self.baddies.create(self.baddieSpawnPoints.x, self.baddieSpawnPoints.y, 'baddie');
         baddie.name = baddieInfo.id;
@@ -106,7 +87,7 @@ function create() {
         //this.actors.add(baddie)
     };
 
-    this.handlePlayerMovement = function (self, playerId, input) {
+    this.handlePlayerMovement = (playerId, input) => {
         self.players.getChildren().forEach((player) => {
             if (playerId === player.playerId) {
                 this.clients[player.playerId].input = input;
@@ -114,7 +95,7 @@ function create() {
         });
     };
 
-    this.handlePlayerAttack = (self, playerId, input) => {
+    this.handlePlayerAttack = (playerId, input) => {
         let angleInRad = input;
         self.players.getChildren().forEach((player) => {
             if (playerId === player.playerId) {
@@ -175,7 +156,7 @@ function create() {
         console.log(attacked.id + ": " + attacked.health);
     };
 
-    this.removePlayer = function (self, playerId) {
+    this.removePlayer = (playerId) => {
         self.players.getChildren().forEach((player) => {
             if (playerId === player.playerId) {
                 player.destroy();
@@ -183,8 +164,30 @@ function create() {
         });
     };
 
+    // ======Setting up the map=============
+
+    // Adds a tilemap object to the phaser game so that phaser can read from it
+    this.map = this.make.tilemap({ key: 'dungeon' });
+    // Selects the tilemap you are using.  TODO: After multiple maps are created, select one of the maps.
+    this.tileset = this.map.addTilesetImage('DungeonSet', 'gameTiles');
+
+    /* Sets background layer to layer called 'backgroundLayer' inside of the tilemap.
+       Should leave these the same for every map for consistency purposes. */
+    this.backgroundlayer = this.map.createStaticLayer('backgroundLayer', this.tileset, 0, 0);
+    this.wallLayer = this.map.createStaticLayer('wallLayer', this.tileset, 0, 0);
+
+    this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
+
+    //this.backgroundlayer.resizeWorld();
+
+    // =======Players========
+    this.spriteScale = 1;
+
+    // 0 in this function means objectLayer (and hopefully stays that way)
+    this.playerSpawnPoints = findObjectsByType('playerStart', this.map, 0);
+    this.baddieSpawnPoints = findObjectsByType('enemy', this.map, 0);
+
     this.clients = {};
-    const self = this;
     this.message = 0;
     this.players = this.physics.add.group();
     this.baddies = this.physics.add.group();
@@ -238,11 +241,11 @@ function randomPosition(max) {
 }
 
 /**
-     * Returns an array of objects of type 'type' from specified layer
-     * @param {*} type 
-     * @param {*} map 
-     * @param {*} layer 
-     */
+* Returns an array of objects of type 'type' from specified layer
+* @param {*} type 
+* @param {*} map 
+* @param {*} layer 
+*/
 function findObjectsByType(type, map, layer) {
     var result = [];
     map.objects[layer].objects.forEach(function (element) {
