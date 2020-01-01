@@ -3,7 +3,7 @@ import game from "./ClientGame.js";
 
 export default class Client {
     constructor(gameInstance) {
-        this.scene = gameInstance.scene.get('Dungeon');
+        this.scene = gameInstance.scene.getScene('Dungeon');
         this.socket = io.connect({ reconnection: false });
 
         this.socket.on('check', (data) => {
@@ -83,21 +83,22 @@ export default class Client {
         this.socket.emit('itemCollected', itemId);
     }
 
-    tryCreateDungeon(mapData) {
-        this.socket.emit('instantiateDungeon', mapData, (msg) => {
+    tryCreateDungeon(name) {
+        this.socket.emit('instantiateDungeon', name, (msg) => {
             console.log(msg);
         });
     }
 
     deleteDungeon(mapName) {
+        // TODO: Implement this
         this.socket.emit('closeDungeon', mapName, (msg) => {
             console.log(msg);
         });
     }
 
-    reqServers(self) {
+    reqServers(serverScene) {
         this.socket.emit('reqServers', "", (list) => {
-            self.serverList.setText("Servers: " + list);
+            serverScene.serverList.setText("Servers: " + list);
         });
     }
 }

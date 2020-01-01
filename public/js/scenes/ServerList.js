@@ -5,31 +5,45 @@ export default class ServerList extends Phaser.Scene {
 			key: 'ServerList',
 			active: false
 		});
-	}
+    }
+    
+    preload() {
+        this.load.image('createButton', 'assets/images/createButton.png');
+        this.load.image('joinButton', 'assets/images/joinButton.png');
+        this.load.image('deleteButton', 'assets/images/deleteButton.png');
+        this.load.image('refreshButton', 'assets/images/refreshButton.png');
+    }
 
     create() {
-        this.serverList = this.add.text(0, this.game.world.centerY-250, "Servers:", {
+        this.serverList = this.add.text(0, this.cameras.main.centerY-250, "Servers:", {
             fill: "#ffffff"
         });
-        this.serverList.anchor.setTo(0.5,0.5);
-        this.serverList.x = this.game.world.centerX;
+        this.serverList.x = this.cameras.main.centerX;
 
-        let joinButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY, 'joinButton', this.startGame, this, 2, 1, 0);
-        joinButton.anchor.setTo(0.5);
+        let joinButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'joinButton').setInteractive();
+        // TODO: Make these buttons robust af
+        joinButton.on('pointerup', () => {
+            this.startGame();
+        });
 
-        let createDungeonButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY+100, 'createButton', this.createDungeon, this, 2, 1, 0);
-        createDungeonButton.anchor.setTo(0.5);
+        let createDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY+100, 'createButton').setInteractive();
+        createDungeonButton.on('pointerup', () => {
+            this.createDungeon();
+        });
 
         /* The server crashes if you click this button when someone else is playing so uh. Don't. :) */
-        let deleteDungeonButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY+200, 'deleteButton', this.deleteDungeon, this, 2, 1, 0);
-        deleteDungeonButton.anchor.setTo(0.5);
+        // Hey past Gabe, this might not be the case anymore, just so you know. Might wanna figure that out, future Gabe. :)
+        let deleteDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY+200, 'deleteButton').setInteractive();
+        deleteDungeonButton.on('pointerup', () => {
+            this.deleteDungeon();
+        });
 
-        let refreshRoomsButton = this.game.add.button(this.game.world.centerX, this.game.world.centerY+300, 'refreshButton', this.refreshRooms, this, 2, 1, 0);
-        refreshRoomsButton.anchor.setTo(0.5);
-        refreshRoomsButton.scale.setTo(0.25,0.25);
+        let refreshRoomsButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY+300, 'refreshButton').setInteractive();
+        refreshRoomsButton.on('pointerup', () => {
+            this.refreshRooms();
+        });
 
         this.refreshRooms();
-
     }
 
     /**
@@ -47,26 +61,10 @@ export default class ServerList extends Phaser.Scene {
     createDungeon() {
         let dungeonName = prompt("Dungeon to create", "default");
 
-        let map = this.game.add.tilemap('dungeon');
-        map.addTilesetImage('DungeonSet', 'gameTiles');
+        this.game.client.tryCreateDungeon(dungeonName);
 
-        let itemsArray = [];
-
-        this.findObjectsByType('item', map, 'objectLayer').forEach(itemData => {
-            itemsArray.push({
-                xPos: itemData.x,
-                yPos: itemData.y,
-                properties: itemData.properties
-            });
-        });
-
-        let mapData = {
-            name: dungeonName,
-            baddieSpawnPoint: this.findObjectsByType('enemy', map, 'objectLayer')[0],
-            itemsArray: itemsArray
-        };
-        
-        this.game.client.tryCreateDungeon(mapData);
+        // TODO: This doesn't do anything cause it takes a sec to create a new Phaser instance
+        // RIP
         this.refreshRooms();
     }
 

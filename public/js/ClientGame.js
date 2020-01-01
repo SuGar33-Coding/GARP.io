@@ -39,6 +39,7 @@ var config = {
 
 /* For storing the client and Phaser game properties */
 const game = new Phaser.Game(config);
-// const game = new Game();
+// Create an instance of the client object attached to this game
+game.client = new Client(game);
 
 export default game;

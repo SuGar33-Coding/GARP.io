@@ -94,8 +94,17 @@ io.on('connection', socket => {
 
     // give list of instances to client
     socket.on('reqServers', (foo, callback) => {
-        console.log(Object.keys(instances));
+        console.log('Instances upon request: ' + Object.keys(instances));
         callback(Object.keys(instances));
+    });
+
+    socket.on('instantiateDungeon', (name, callback) => {
+        if (instances.hasOwnProperty(name)) {
+            callback(`Dungeon name '${name}' is taken`);
+        } else {
+            newPhaserInstance(name, uniqid("room-"));
+            callback(`Dungeon '${name}' has been created on server`);
+        }
     });
 
     // try to put client in instance and set up their game
@@ -150,13 +159,16 @@ io.on('connection', socket => {
     socket.on('disconnect', () => {
         connectedClients.delete(socket.id);
         console.log('User ' + socket.id + ' disconnected');
-        // remove player from server
-        game.removePlayer(socket.id);
-        // remove this player from our players object
-        delete players[socket.id];
-        // emit a message to all players in instance to remove this player
-        // TODO: check if this doesnt break anything
-        io.to(roomName).emit('disconnect', socket.id);
+        // First make sure we actually connected to a game
+        if (game) {
+            // remove player from server
+            game.removePlayer(socket.id);
+            // remove this player from our players object
+            delete players[socket.id];
+            // emit a message to all players in instance to remove this player
+            // TODO: check if this doesnt break anything
+            io.to(roomName).emit('disconnect', socket.id);
+        }
     });
 });
 
