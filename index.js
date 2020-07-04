@@ -230,7 +230,7 @@ readline.on('line', input => {
         inputs[input]();
     } catch (error) {
         console.log(`'${input}' is not a valid input`);
-        console.log(error);
+        // console.log(error);
     }
     readline.prompt();
 });
