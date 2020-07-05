@@ -32,7 +32,12 @@ export default class Boot extends Phaser.Scene {
 		// set the client info
 		this.game.client = this.scene.get('Dungeon');
 
-		this.scene.switch('Preload');
+		// this.scene.switch('Preload');
+		this.scene.transition({
+			target: 'Preload',
+			remove: true,
+			duration: 1
+		})
 	}
 }
 
