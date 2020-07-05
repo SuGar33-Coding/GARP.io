@@ -18,23 +18,28 @@ export default class Dungeon extends Phaser.Scene {
         }, 2000);
 
         // Adds a tilemap object to the phaser game so that phaser can read from it
-        this.map = this.game.add.tilemap('dungeon');
+        // this.map = this.game.add.tilemap('dungeon');
+        this.map = this.add.tilemap('dungeon')
         // Selects the tilemap you are using.  TODO: After multiple maps are created, select one of the maps.
         this.map.addTilesetImage('DungeonSet', 'gameTiles');
 
         /* Sets background layer to layer called 'backgroundLayer' inside of the tilemap.
            Should leave these the same for every map for consistency purposes.*/
-        this.backgroundlayer = this.map.createLayer('backgroundLayer');
-        this.wallLayer = this.map.createLayer('wallLayer');
+        // this.backgroundlayer = this.map.createLayer('backgroundLayer');
+        this.backgroundlayer = this.map.createStaticLayer('bakgroundLayer', 'DungeonSet')
+
+        // this.wallLayer = this.map.createLayer('wallLayer');
+        this.wallLayer = this.map.createStaticLayer('wallLayer', 'DungeonSet');
 
         // Do not need as client no longer checks collision
         // this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
 
-        this.backgroundlayer.resizeWorld();
+        // this.backgroundlayer.resizeWorld();
 
         // ========Dealing with spawning player===========
         /* Find spawn points labelled 'playerStart' on the tilemap and place the player sprite there */
         var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
+        // var playerStarts = this.map.findObject('playerStart', this.findObjectsByType); 
         this.player = this.physics.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
         this.player.scale.setTo(this.spriteScale);
         this.player.id = this.game.client.socket.id;

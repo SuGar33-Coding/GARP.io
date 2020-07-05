@@ -12,6 +12,7 @@ export default class Preload extends Phaser.Scene {
 
         // Create an instance of the client object attached to this game
         this.game.client = new Client(this.game);
+        // console.log(this.game)
 
         /* Create loading bar functionality */
         let progressBar = this.add.graphics();
@@ -61,6 +62,8 @@ export default class Preload extends Phaser.Scene {
         this.load.image('refreshButton', 'assets/images/refreshButton.png');
         // this.load.tilemap('dungeon','assets/tilemaps/TileMap.json', null, Phaser.Tilemap.TILED_JSON);
         // this.load.image('gameTiles', 'assets/tilemaps/DungeonTileSet.png');
+        this.load.tilemapTiledJSON('dungeon', 'assets/tilemaps/TileMap.json');
+        this.load.image('gameTiles', 'assets/tilemaps/DungeonTileSet.png');
         // TODO: Move out map preloading to dungeon for when we have multiple maps to choose from
     }
 

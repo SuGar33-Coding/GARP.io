@@ -3,7 +3,8 @@
 
 export default class Client {
     constructor(gameInstance) {
-        this.scene = gameInstance.scene.getScene('Dungeon');
+        // this.scene = gameInstance.scene.getScene('Dungeon');
+        this.game = gameInstance;
         this.socket = io.connect({ reconnection: false });
 
         this.socket.on('check', (data) => {
@@ -21,7 +22,8 @@ export default class Client {
     joinDungeon(name) {
         this.socket.emit('joinDungeon', name, (enteredDungeon) => {
             if (enteredDungeon) {
-                this.scene.scene.switch('ServerList');
+                this.game.scene.switch('ServerList', 'Dungeon');
+                console.log(this.game)
             } else {
                 alert("Dungeon does not exist");
             }
