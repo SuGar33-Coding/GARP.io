@@ -1,10 +1,4 @@
 /*jshint esversion: 6 */
-const readline = require('readline').createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: 'GARPio CLI > '
-});
-
 const path = require('path');
 const jsdom = require('jsdom');
 const express = require('express');
@@ -63,7 +57,7 @@ function newPhaserInstance(roomName, id) {
 // hard-coded test instance
 var id1 = uniqid("room-");
 var name1 = 'default';
-newPhaserInstance(name1, id1);
+// newPhaserInstance(name1, id1);
 
 /* ========Handle socket.io connections========= */
 
@@ -204,12 +198,18 @@ server.listen(8082, () => {
 
 /* ==========Define CLI========== */
 
+const readline = require('readline').createInterface({
+    input: process.stdin,
+    output: process.stdout,
+    prompt: 'GARPio CLI > '
+});
+
 // List of defined inputs for CLI
 let inputs = {
     secret: () => console.log(`You found the secret! UwU xD *nuzzles you*`),
     // TODO: make sure connectedClients variable is actually consistent
     clients: () => console.log(`Connected clients: ${JSON.stringify(Array.from(connectedClients))}`),
-    instances: () => console.log(`Instances: ${Object.keys(instances)}`),
+    instances: () => console.log(`List of instances: ${Object.keys(instances)}`),
     instances_v: () => {
         console.log('=======');
         Object.keys(instances).forEach(key => {
