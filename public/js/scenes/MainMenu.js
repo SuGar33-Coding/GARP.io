@@ -12,7 +12,7 @@ export default class MainMenu extends Phaser.Scene {
 
         let playButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'playButton').setInteractive();
 
-        playButton.on('pointerdown', () => this.enterServerList(this) );
+        playButton.on('pointerup', () => this.enterServerList(this) );
 
     }
 
