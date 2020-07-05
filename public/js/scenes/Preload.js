@@ -1,3 +1,4 @@
+/** @type {import("../../../defs/phaser")} */
 export default class Preload extends Phaser.Scene {
     constructor () {
 		super({
@@ -29,7 +30,7 @@ export default class Preload extends Phaser.Scene {
         this.load.spritesheet('refreshButton', 'assets/images/refreshButton.png');
         this.load.tilemap('dungeon','assets/tilemaps/TileMap.json', null, Phaser.Tilemap.TILED_JSON);
         this.load.image('gameTiles', 'assets/tilemaps/DungeonTileSet.png');
-
+        console.log("Loaded in erything");
         // TODO: Move out map preloading to dungeon for when we have multiple maps to choose from
     }
 
