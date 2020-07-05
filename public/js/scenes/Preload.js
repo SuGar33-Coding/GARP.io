@@ -14,7 +14,10 @@ export default class Preload extends Phaser.Scene {
         this.game.client = new Client(this.game);
         // console.log(this.game)
 
-        /* Create loading bar functionality */
+        /* Create loading bar functionality 
+         * Followed this wonderful guide:
+         * https://gamedevacademy.org/creating-a-preloading-screen-in-phaser-3/?a=13
+         */
         let progressBar = this.add.graphics();
         let progressBox = this.add.graphics();
         progressBox.fillStyle(0x222222, 0.8);
