@@ -29,9 +29,6 @@ export default class Boot extends Phaser.Scene {
 		// this.game.physics.startSystem(Phaser.Physics.ARCADE);
 		// this.game.stage.backgroundColor = '#000';
 
-		// set the client info
-		this.game.client = this.scene.get('Dungeon');
-
 		// this.scene.switch('Preload');
 		this.scene.transition({
 			target: 'Preload',
