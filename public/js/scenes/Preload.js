@@ -1,4 +1,3 @@
-/** @type {import("../../../defs/phaser")} */
 import Client from '../client.js';
 export default class Preload extends Phaser.Scene {
     constructor() {

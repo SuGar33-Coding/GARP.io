@@ -1,4 +1,4 @@
-/* jshint esversion: 6 */
+/** @type {import("../../defs/phaser")} */
 import Boot from './scenes/Boot.js';
 import Preload from './scenes/Preload.js';
 import MainMenu from './scenes/MainMenu.js';
