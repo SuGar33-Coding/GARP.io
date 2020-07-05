@@ -14,6 +14,7 @@ export default class Preload extends Phaser.Scene {
         // Create an instance of the client object attached to this game
         this.game.client = new Client(this.game);
 
+        /* Create loading bar functionality */
         let progressBar = this.add.graphics();
         let progressBox = this.add.graphics();
         progressBox.fillStyle(0x222222, 0.8);
@@ -28,7 +29,7 @@ export default class Preload extends Phaser.Scene {
         });
 
         this.load.on('complete', () => {
-            console.log('complete');
+            console.log('Assets loaded');
             // self.scene.switch('MainMenu');
             self.scene.transition({
                 target: 'MainMenu',
@@ -44,19 +45,9 @@ export default class Preload extends Phaser.Scene {
             progressBar.fillRect(250, 280, 300 * value, 30);
         });
 
-        this.title = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'title');
+        this.title = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 150, 'title');
 
-        // this.loadbar = this.add.image(this.cameras.main.centerX, this.cameras.main.centerX + 128, 'loadbar');
-
-        this.load.image('yeet', 'assets/sprites/Player2.png');
-        for (var i = 0; i < 500; i++) {
-            this.load.image('yeet' + i, 'assets/sprites/Player2.png');
-        }
-
-        // this.load.setPreloadSprite(this.loadbar);
-
-        // load game assets here
-
+        /* Load assets */
         this.load.image('player', 'assets/sprites/Player2.png');
         this.load.image('attack', 'assets/sprites/attack.png');
         this.load.image('spear', 'assets/sprites/spear.png');
@@ -75,5 +66,6 @@ export default class Preload extends Phaser.Scene {
     }
 
     create() {
+        // it switches scenes when the Phaser progress completion event fires
     }
 };
