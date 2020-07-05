@@ -1,5 +1,5 @@
 /* jshint esversion: 6 */
-import game from "./ClientGame.js";
+// import game from "./ClientGame.js";
 
 export default class Client {
     constructor(gameInstance) {

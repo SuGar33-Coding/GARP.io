@@ -12,14 +12,16 @@ export default class MainMenu extends Phaser.Scene {
 
         let playButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'playButton').setInteractive();
 
-        playButton.on('pointerover', () => {
-            this.enterServerList(this);
-        });
+        playButton.on('pointerdown', () => this.enterServerList(this) );
 
     }
 
     enterServerList(context) {
-        context.scene.switch('ServerList');
+        context.scene.transition({
+            target: 'ServerList',
+            remove: true,
+            duration: 1
+        })
     }
 }
 

@@ -4,7 +4,6 @@ import Preload from './scenes/Preload.js';
 import MainMenu from './scenes/MainMenu.js';
 import Dungeon from './scenes/Dungeon.js';
 import ServerList from './scenes/ServerList.js';
-import Client from './client.js';
 
 // class Game extends Phaser.Game {
 //     constructor() {
@@ -46,7 +45,5 @@ var config = {
 
 /* For storing the client and Phaser game properties */
 const game = new Phaser.Game(config);
-// Create an instance of the client object attached to this game
-game.client = new Client(game);
 
-export default game;
+// export default game;

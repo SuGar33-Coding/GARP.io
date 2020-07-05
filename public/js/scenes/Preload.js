@@ -1,4 +1,5 @@
 /** @type {import("../../../defs/phaser")} */
+import Client from '../client.js';
 export default class Preload extends Phaser.Scene {
     constructor() {
         super({
@@ -9,6 +10,9 @@ export default class Preload extends Phaser.Scene {
 
     preload() {
         const self = this;
+
+        // Create an instance of the client object attached to this game
+        this.game.client = new Client(this.game);
 
         let progressBar = this.add.graphics();
         let progressBox = this.add.graphics();
@@ -25,7 +29,12 @@ export default class Preload extends Phaser.Scene {
 
         this.load.on('complete', () => {
             console.log('complete');
-            self.scene.switch('MainMenu');
+            // self.scene.switch('MainMenu');
+            self.scene.transition({
+                target: 'MainMenu',
+                remove: true,
+                duration: 1
+            })
         });
 
         this.load.on('progress', function (value) {

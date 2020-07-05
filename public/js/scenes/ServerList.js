@@ -1,12 +1,12 @@
 /* jshint esversion: 6 */
 export default class ServerList extends Phaser.Scene {
-    constructor () {
-		super({
-			key: 'ServerList',
-			active: false
-		});
+    constructor() {
+        super({
+            key: 'ServerList',
+            active: false
+        });
     }
-    
+
     preload() {
         this.load.image('createButton', 'assets/images/createButton.png');
         this.load.image('joinButton', 'assets/images/joinButton.png');
@@ -15,35 +15,35 @@ export default class ServerList extends Phaser.Scene {
     }
 
     create() {
-        this.serverList = this.add.text(0, this.cameras.main.centerY-250, "Servers:", {
+        this.serverList = this.add.text(0, this.cameras.main.centerY - 250, "Servers:", {
             fill: "#ffffff"
         });
         this.serverList.x = this.cameras.main.centerX;
 
-        let joinButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'joinButton').setInteractive();
+        let joinButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 125, 'joinButton').setInteractive();
         // TODO: Make these buttons robust af
         joinButton.on('pointerup', () => {
             this.startGame();
         });
 
-        let createDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY+100, 'createButton').setInteractive();
+        let createDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 25, 'createButton').setInteractive();
         createDungeonButton.on('pointerup', () => {
             this.createDungeon();
         });
 
         /* The server crashes if you click this button when someone else is playing so uh. Don't. :) */
         // Hey past Gabe, this might not be the case anymore, just so you know. Might wanna figure that out, future Gabe. :)
-        let deleteDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY+200, 'deleteButton').setInteractive();
+        let deleteDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY + 75, 'deleteButton').setInteractive();
         deleteDungeonButton.on('pointerup', () => {
             this.deleteDungeon();
         });
 
-        let refreshRoomsButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY+300, 'refreshButton').setInteractive();
+        let refreshRoomsButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY + 175, 'refreshButton').setInteractive().setScale(.25);
         refreshRoomsButton.on('pointerup', () => {
             this.refreshRooms();
         });
 
-        this.refreshRooms();
+        // this.refreshRooms();
     }
 
     /**
