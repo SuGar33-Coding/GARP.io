@@ -21,10 +21,16 @@ import Client from './client.js';
 
 var config = {
     type: Phaser.AUTO,
-    width: window.innerWidth,
-    height: window.innerHeight,
-    parent: 'phaser-canvas',
+    // width: window.innerWidth,
+    // height: window.innerHeight,
+    // parent: 'phaser-canvas',
     backgroundColor: '#000',
+    scale: {
+        mode: Phaser.Scale.FIT,
+        parent: 'phaser-canvas',
+        width: 800,
+        height: 600
+    },
     physics: {
         default: 'arcade',
         arcade: {
@@ -34,7 +40,8 @@ var config = {
     },
     // I recommend removing scenes from this and adding them back one by one when upgrading to Phaser 3
     // NOTE: They are prioritzied in reverse order
-    scene: [Dungeon, ServerList, MainMenu, Preload, Boot]
+    // scene: [ServerList, MainMenu, Preload, Boot]
+    scene: [Boot, Preload, MainMenu, ServerList]
 };
 
 /* For storing the client and Phaser game properties */
