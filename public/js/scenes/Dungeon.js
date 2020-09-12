@@ -19,14 +19,14 @@ export default class Dungeon extends Phaser.Scene {
 
         // Adds a tilemap object to the phaser game so that phaser can read from it
         // this.map = this.game.add.tilemap('dungeon');
-        this.map = this.make.tilemap({key: 'dungeon'});
+        this.map = this.make.tilemap({ key: 'dungeon' });
         // Selects the tilemap you are using.  TODO: After multiple maps are created, select one of the maps.
         this.map.addTilesetImage('DungeonSet', 'gameTiles');
 
         /* Sets background layer to layer called 'backgroundLayer' inside of the tilemap.
            Should leave these the same for every map for consistency purposes.*/
         // this.backgroundlayer = this.map.createLayer('backgroundLayer');
-        this.backgroundlayer = this.map.createStaticLayer('bakgroundLayer', 'DungeonSet')
+        this.backgroundlayer = this.map.createStaticLayer('backgroundLayer', 'DungeonSet')
 
         // this.wallLayer = this.map.createLayer('wallLayer');
         this.wallLayer = this.map.createStaticLayer('wallLayer', 'DungeonSet');
@@ -52,10 +52,8 @@ export default class Dungeon extends Phaser.Scene {
         //this.player.body.collideWorldBounds = true;
 
         /* Teh SP34R */
-        this.player.spear = this.player.addChild(this.make.sprite(10, 0, 'spear'));
+        this.player.spear = this.physics.add.sprite(10, 0, 'spear');
         this.player.spear.exhausted = false; //A bool to check if it has already delt its desired damage after being used 
-        this.game.physics.arcade.enable(this.player.spear);
-        this.player.spear.anchor.setTo(.5);
         // TODO: Eventually make it able to do this with any weapon
 
         /* Send player to Server */
@@ -73,7 +71,6 @@ export default class Dungeon extends Phaser.Scene {
         // =========Dealing with baddies==============
         // Create a group of the objects of the baddies and enable physics on them
         this.baddies = this.add.group();
-        this.game.physics.arcade.enable(this.baddies);
         this.baddiesExist = new Set();
 
         /* set spawn point */
@@ -84,24 +81,21 @@ export default class Dungeon extends Phaser.Scene {
 
         /* Group containing all bodies that collide with the world and eachother */
         // create an actor group that includes all players because this player and otherPlayers are the same when receiving data from server
-        this.actors = this.game.add.group();        
+        this.actors = this.add.group();
         this.actors.add(this.player);
         // No longer need actors group because of collision being moved to server
 
-        this.items = this.game.add.group(); // picked up by players
-        this.items.enableBody = true;
+        this.items = this.add.group(); // picked up by players
 
         // =========Misc=============================
-        this.game.camera.follow(this.player);
-
-        this.cursors = this.game.input.keyboard.createCursorKeys();
+        this.cameras.main.startFollow(this.player);
 
         /* set up movement from wasd */
         this.wasd = {
-            up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
-            down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
-            left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
-            right: this.game.input.keyboard.addKey(Phaser.Keyboard.D)
+            up: this.input.keyboard.addKey('W'),
+            down: this.input.keyboard.addKey('S'),
+            left: this.input.keyboard.addKey('A'),
+            right: this.input.keyboard.addKey('D')
         }
 
         // These are the inital values of whether the keys are pressed in or not
@@ -111,7 +105,7 @@ export default class Dungeon extends Phaser.Scene {
         this.downKeyPressed = false;
 
         /* handle player attacking with spear */
-        this.game.input.onDown.add(function () {
+        this.input.on('pointerdown', () => {
             var angleInRad = this.game.physics.arcade.angleToPointer(this.player);
             this.sendPlayerAttack(angleInRad);
 
@@ -171,14 +165,15 @@ export default class Dungeon extends Phaser.Scene {
                 this.sendPlayerData()
             }, this);*/
             //this.attack.destroy();
-        }, this);
+        })
+        // this.game.input.onDown.add(function () {
+            
+        // }, this);
 
         /* Initialize score */
         this.score = this.add.text(0, 0, "Score: 0", {
             fill: "#ffffff"
-        });
-        this.score.fixedToCamera = true;
-        this.score.cameraOffset.setTo(20, 20);
+        }).setScrollFactor(1);
 
         // ============Start update loop==============
         this.game.client.enteredDungeon();
@@ -198,35 +193,29 @@ export default class Dungeon extends Phaser.Scene {
         this.player.body.velocity.y = 0;
         this.player.body.velocity.x = 0;*/
 
+        // this.cursors = this.game.input.keyboard.createCursorKeys();
         /* See if there has been any change in the movement of the player/what keys are being pressed */
-        const left = this.leftKeyPressed;
-        const right = this.rightKeyPressed;
-        const up = this.upKeyPressed;
-        const down = this.downKeyPressed;
+        const leftPrevious = this.leftKeyPressed;
+        const rightPrevious = this.rightKeyPressed;
+        const upPrevious = this.upKeyPressed;
+        const downPrevious = this.downKeyPressed;
 
-        if (this.wasd.up.isDown) {
-            this.upKeyPressed = true;
-        } else {
-            this.upKeyPressed = false;
-        }
-        if (this.wasd.down.isDown) {
-            this.downKeyPressed = true;
-        } else {
-            this.downKeyPressed = false;
-        }
-        if (this.wasd.left.isDown) {
-            this.leftKeyPressed = true;
-        } else {
-            this.leftKeyPressed = false;
-        }
-        if (this.wasd.right.isDown) {
-            this.rightKeyPressed = true;
-        } else {
-            this.rightKeyPressed = false;
-        }
+        this.wasd.up.isDown ? this.upKeyPressed = true : this.upKeyPressed = false;
+        this.wasd.down.isDown ? this.downKeyPressed = true : this.downKeyPressed = false;
+        this.wasd.left.isDown ? this.leftKeyPressed = true : this.leftKeyPressed = false;
+        this.wasd.right.isDown ? this.rightKeyPressed = true : this.rightKeyPressed = false;
 
-        if (left !== this.leftKeyPressed || right !== this.rightKeyPressed || up !== this.upKeyPressed || down !== this.downKeyPressed) {
-            sendPlayerMovement({ left: this.leftKeyPressed, right: this.rightKeyPressed, up: this.upKeyPressed, down: this.downKeyPressed });
+        /* Only sends new info if the state of the press has changed */
+        if (leftPrevious !== this.leftKeyPressed
+            || rightPrevious !== this.rightKeyPressed
+            || upPrevious !== this.upKeyPressed
+            || downPrevious !== this.downKeyPressed) {
+            this.sendPlayerMovement({
+                left: this.leftKeyPressed,
+                right: this.rightKeyPressed,
+                up: this.upKeyPressed,
+                down: this.downKeyPressed
+            });
         }
 
         /* Old movement handling 
@@ -393,7 +382,7 @@ export default class Dungeon extends Phaser.Scene {
                 actor.y = playerList[actor.id].yPos;
                 actor.spear.x = playerList[actor.id].xPosSpear;
                 actor.spear.y = playerList[actor.id].yPosSpear;
-                
+
             } else { // player is stale/ded
                 actor.kill();
                 actor.destroy();
