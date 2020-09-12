@@ -20,20 +20,24 @@ export default class ServerList extends Phaser.Scene {
         });
         this.serverList.x = this.cameras.main.centerX;
 
-        let joinButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 125, 'joinButton').setInteractive();
-        // TODO: Make these buttons robust af
-        joinButton.on('pointerup', () => this.startGame() );
+        this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 125, 'joinButton')
+            .setInteractive()
+            .on('pointerup', () => this.startGame() );
 
-        let createDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 25, 'createButton').setInteractive();
-        createDungeonButton.on('pointerup', () => this.createDungeon() );
+        this.add.image(this.cameras.main.centerX, this.cameras.main.centerY - 25, 'createButton')
+            .setInteractive()
+            .on('pointerup', () => this.createDungeon() );
 
         /* The server crashes if you click this button when someone else is playing so uh. Don't. :) */
         // Hey past Gabe, this might not be the case anymore, just so you know. Might wanna figure that out, future Gabe. :)
-        let deleteDungeonButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY + 75, 'deleteButton').setInteractive();
-        deleteDungeonButton.on('pointerup', () => this.deleteDungeon() );
+        this.add.image(this.cameras.main.centerX, this.cameras.main.centerY + 75, 'deleteButton')
+            .setInteractive()
+            .on('pointerup', () => this.deleteDungeon() );
 
-        let refreshRoomsButton = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY + 175, 'refreshButton').setInteractive().setScale(.25);
-        refreshRoomsButton.on('pointerup', () => this.refreshRooms() );
+        this.add.image(this.cameras.main.centerX, this.cameras.main.centerY + 175, 'refreshButton')
+            .setInteractive()
+            .setScale(.25)
+            .on('pointerup', () => this.refreshRooms() );
 
         // this.refreshRooms();
     }
