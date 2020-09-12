@@ -63,8 +63,6 @@ export default class Preload extends Phaser.Scene {
         this.load.image('joinButton', 'assets/images/joinButton.png');
         this.load.image('deleteButton', 'assets/images/deleteButton.png');
         this.load.image('refreshButton', 'assets/images/refreshButton.png');
-        // this.load.tilemap('dungeon','assets/tilemaps/TileMap.json', null, Phaser.Tilemap.TILED_JSON);
-        // this.load.image('gameTiles', 'assets/tilemaps/DungeonTileSet.png');
         this.load.tilemapTiledJSON('dungeon', 'assets/tilemaps/TileMap.json');
         this.load.image('gameTiles', 'assets/tilemaps/DungeonTileSet.png');
         // TODO: Move out map preloading to dungeon for when we have multiple maps to choose from

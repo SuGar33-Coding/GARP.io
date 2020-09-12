@@ -19,7 +19,7 @@ export default class Dungeon extends Phaser.Scene {
 
         // Adds a tilemap object to the phaser game so that phaser can read from it
         // this.map = this.game.add.tilemap('dungeon');
-        this.map = this.add.tilemap('dungeon')
+        this.map = this.make.tilemap({key: 'dungeon'});
         // Selects the tilemap you are using.  TODO: After multiple maps are created, select one of the maps.
         this.map.addTilesetImage('DungeonSet', 'gameTiles');
 
@@ -38,12 +38,13 @@ export default class Dungeon extends Phaser.Scene {
 
         // ========Dealing with spawning player===========
         /* Find spawn points labelled 'playerStart' on the tilemap and place the player sprite there */
-        var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
-        // var playerStarts = this.map.findObject('playerStart', this.findObjectsByType); 
-        this.player = this.physics.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player');
-        this.player.scale.setTo(this.spriteScale);
+        // var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
+        let playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer')
+        this.map.getObjectLayer()
+        this.player = this.physics.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player')
+            .setScale(this.spriteScale);
         this.player.id = this.game.client.socket.id;
-        this.player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
+        // this.player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
 
         // Set Player Speed
         this.playerSpeed = 120;
@@ -269,13 +270,14 @@ export default class Dungeon extends Phaser.Scene {
 
     /**
      * Returns an array of objects of type 'type' from specified layer
-     * @param {*} type 
-     * @param {*} map 
-     * @param {*} layer 
+     * @param {String} type 
+     * @param {Phaser.Tilemaps.ObjectLayer} map 
+     * @param {String} layer 
      */
     findObjectsByType(type, map, layer) {
-        var result = new Array();
-        map.objects[layer].forEach(function (element) {
+        let result = [];
+        let layerObj = map.getObjectLayer(layer);
+        layerObj.objects.forEach(function (element) {
             if (element.type === type) {
                 element.y -= map.tileHeight;
                 result.push(element);
