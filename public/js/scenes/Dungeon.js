@@ -167,7 +167,7 @@ export default class Dungeon extends Phaser.Scene {
             //this.attack.destroy();
         })
         // this.game.input.onDown.add(function () {
-            
+
         // }, this);
 
         /* Initialize score */
@@ -175,8 +175,8 @@ export default class Dungeon extends Phaser.Scene {
             fill: "#ffffff"
         }).setScrollFactor(1);
 
-        // ============Start update loop==============
-        this.game.client.enteredDungeon();
+        // ============Start handling updates==============
+        this.game.client.enteredDungeon = true;
     }
 
     update() {
@@ -297,18 +297,16 @@ export default class Dungeon extends Phaser.Scene {
      */
     createOtherPlayer(playerData) {
         /* Give their position */
-        let otherPlayer = this.add.sprite(playerData.xPos, playerData.yPos, 'player');
-        otherPlayer.anchor.setTo(0.5);
-        otherPlayer.scale.setTo(this.spriteScale);
+        let otherPlayer = this.physics.add.sprite(playerData.xPos, playerData.yPos, 'player')
+            .setScale(this.spriteScale);
 
         /* Give em a spear */
-        otherPlayer.spear = otherPlayer.addChild(this.make.sprite(playerData.xPosSpear, playerData.yPosSpear, 'spear'));
-        otherPlayer.spear.angle = playerData.angleSpear;
-        otherPlayer.spear.anchor.setTo(.5);
+        // otherPlayer.spear = otherPlayer.addChild(this.make.sprite(playerData.xPosSpear, playerData.yPosSpear, 'spear'));
+        // otherPlayer.spear.angle = playerData.angleSpear;
+        // otherPlayer.spear.anchor.setTo(.5);
 
         otherPlayer.id = playerData.id;
         this.actors.add(otherPlayer);
-        this.game.physics.arcade.enable(otherPlayer);
     }
 
     /**
@@ -373,20 +371,20 @@ export default class Dungeon extends Phaser.Scene {
     }
 
     updatePlayers(playerList) {
-
-        this.actors.forEach(actor => { // If it does, update its params
+        this.actors.getChildren().forEach(actor => { // If it does, update its params
             if (playerList[actor.id]) {
-
+                console.log(playerList[actor.id].xPos)
                 // Update player position to whatever the server is telling us it is
                 actor.x = playerList[actor.id].xPos;
                 actor.y = playerList[actor.id].yPos;
                 actor.spear.x = playerList[actor.id].xPosSpear;
                 actor.spear.y = playerList[actor.id].yPosSpear;
-
-            } else { // player is stale/ded
-                actor.kill();
-                actor.destroy();
-                this.actors.remove(actor);
+            } else if (true) { // player is stale/ded
+                //TODO: Figure out why it adds a new actor with no id every time
+                console.log(`Abouta delete ${actor.id}`)
+                this.actors.remove(actor, true, true);
+            } else {
+                //NOTE: for some reason there seems to always be an extra child of the group
             }
         });
         /* Checks if global server-side player is on client yet, if not, add it */

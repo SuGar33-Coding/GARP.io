@@ -6,22 +6,39 @@ export default class Client {
         // this.scene = gameInstance.scene.getScene('Dungeon');
         this.game = gameInstance;
         this.socket = io.connect({ reconnection: false });
+        this.enteredDungeon = false;
 
+        // Set up WS listeners
         this.socket.on('check', (data) => {
             console.log(data);
         });
         this.socket.on('update', (updatePackage) => {
-            this.scene.updatePlayers(updatePackage.players);
-            this.scene.updateBaddies(updatePackage.baddies);
-            this.scene.refreshItems(updatePackage.items);
-            this.scene.updateScore(updatePackage.score);
-            this.scene.resetDisconnectTimeout();
+            console.log('gothere')
+            if (this.enteredDungeon) {
+                const scene = this.game.scene.get('Dungeon');
+                scene.updateBaddies(updatePackage.baddies);
+                scene.refreshItems(updatePackage.items);
+                scene.updateScore(updatePackage.score);
+                scene.updatePlayers(updatePackage.players);
+                scene.resetDisconnectTimeout();
+            } else {
+                // Not ready yet ;)
+            }
         });
+        this.socket.on('playerUpdate', playerData => {
+            console.log('UPDATE')
+            if(this.enteredDungeon) {
+                const scene = this.game.scene.keys['Dungeon'];
+                console.log('About to call updatePlayers')
+                scene.updatePlayers(playerData);
+                scene.resetDisconnectTimeout();
+            }
+        })
     }
 
     joinDungeon(name) {
-        this.socket.emit('joinDungeon', name, (enteredDungeon) => {
-            if (enteredDungeon) {
+        this.socket.emit('joinDungeon', name, (dungeon) => {
+            if (dungeon) {
                 this.game.scene.switch('ServerList', 'Dungeon');
                 console.log(this.game)
             } else {
@@ -65,10 +82,6 @@ export default class Client {
 
     testFunc() {
         this.socket.emit('test', "Test Went Thru");
-    }
-
-    enteredDungeon() {
-        this.socket.emit('enterDungeon');
     }
 
     playerMoved(playerData) {

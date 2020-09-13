@@ -62,6 +62,7 @@ var name1 = 'default';
 /* ========Handle socket.io connections========= */
 
 io.on('connection', socket => {
+    socket.emit('check', 'weesnaw');
     // Add client to global list for consistency
     connectedClients.add(socket.id);
 
@@ -172,7 +173,7 @@ server.sendUpdate = () => {
     // TODO: Bundle all these updates into one update package
     Object.keys(instances).forEach(roomName => {
         let game = instances[roomName];
-        io.to(roomName).emit('playerUpdates', game.clients);
+        io.to(roomName).emit('playerUpdate', game.clients);
         io.to(roomName).emit('updateScore', game.scores);
         io.to(roomName).emit('starLocation', { x: game.star.x, y: game.star.y });
     });

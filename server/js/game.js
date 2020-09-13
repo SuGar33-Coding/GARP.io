@@ -165,8 +165,8 @@ class Instance extends Phaser.Scene {
         this.spriteScale = 1;
     
         // 0 in this function means objectLayer (and hopefully stays that way)
-        this.playerSpawnPoints = findObjectsByType('playerStart', this.map, 0);
-        this.baddieSpawnPoints = findObjectsByType('enemy', this.map, 0);
+        this.playerSpawnPoints = findObjectsByType('playerStart', this.map, 'objectLayer');
+        this.baddieSpawnPoints = findObjectsByType('enemy', this.map, 'objectLayer');
     
         this.clients = {};
         this.message = 0;
@@ -223,14 +223,15 @@ function randomPosition(max) {
 }
 
 /**
-* Returns an array of objects of type 'type' from specified layer
-* @param {*} type 
-* @param {*} map 
-* @param {*} layer 
-*/
+ * Returns an array of objects of type 'type' from specified layer
+ * @param {String} type 
+ * @param {Phaser.Tilemaps.ObjectLayer} map 
+ * @param {String} layer 
+ */
 function findObjectsByType(type, map, layer) {
-    var result = [];
-    map.objects[layer].objects.forEach(function (element) {
+    let result = [];
+    let layerObj = map.getObjectLayer(layer);
+    layerObj.objects.forEach(function (element) {
         if (element.type === type) {
             element.y -= map.tileHeight;
             result.push(element);
