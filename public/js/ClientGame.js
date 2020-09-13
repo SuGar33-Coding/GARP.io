@@ -39,6 +39,7 @@ var config = {
     },
     // I recommend removing scenes from this and adding them back one by one when upgrading to Phaser 3
     // NOTE: They are prioritzied in reverse order
+    // NOTE: Yeah I don't think they are
     // scene: [ServerList, MainMenu, Preload, Boot]
     scene: [Boot, Preload, MainMenu, ServerList, Dungeon]
 };
