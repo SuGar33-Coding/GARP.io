@@ -26,7 +26,6 @@ export default class Client {
             }
         });
         this.socket.on('playerUpdate', playerData => {
-            console.log('UPDATE')
             if(this.enteredDungeon) {
                 const scene = this.game.scene.keys['Dungeon'];
                 console.log('About to call updatePlayers')

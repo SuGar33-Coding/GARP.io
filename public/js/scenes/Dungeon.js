@@ -373,15 +373,13 @@ export default class Dungeon extends Phaser.Scene {
     updatePlayers(playerList) {
         this.actors.getChildren().forEach(actor => { // If it does, update its params
             if (playerList[actor.id]) {
-                console.log(playerList[actor.id].xPos)
                 // Update player position to whatever the server is telling us it is
-                actor.x = playerList[actor.id].xPos;
-                actor.y = playerList[actor.id].yPos;
-                actor.spear.x = playerList[actor.id].xPosSpear;
-                actor.spear.y = playerList[actor.id].yPosSpear;
+                actor.x = playerList[actor.id].x;
+                actor.y = playerList[actor.id].y;
+                // actor.spear.x = playerList[actor.id].xPosSpear;
+                // actor.spear.y = playerList[actor.id].yPosSpear;
             } else if (true) { // player is stale/ded
                 //TODO: Figure out why it adds a new actor with no id every time
-                console.log(`Abouta delete ${actor.id}`)
                 this.actors.remove(actor, true, true);
             } else {
                 //NOTE: for some reason there seems to always be an extra child of the group

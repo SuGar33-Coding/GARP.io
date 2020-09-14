@@ -113,32 +113,32 @@ io.on('connection', socket => {
         // get the phaser instance, including its functions
         game = instances[roomName];
         // get list of players by socket.io id in this instance
-        players = game.clients;
+        // players = game.clients;
         // join the socket.io room for this instance
         socket.join(roomName);
         // create a new default player object in players
-        players[socket.id] = {
-            xPos: 0,
-            yPos: 0,
-            playerId: socket.id,
-            input: {
-                left: false,
-                right: false,
-                up: false,
-                down: false
-            },
-            xPosSpear: 0,
-            yPosSpear: 0,
-            angleSpear: 0
-        };
+        // players[socket.id] = {
+        //     xPos: 0,
+        //     yPos: 0,
+        //     playerId: socket.id,
+        //     input: {
+        //         left: false,
+        //         right: false,
+        //         up: false,
+        //         down: false
+        //     },
+        //     xPosSpear: 0,
+        //     yPosSpear: 0,
+        //     angleSpear: 0
+        // };
         // add player to server instance
-        game.addPlayer(players[socket.id]);
+        game.addPlayer(socket.id);
 
         // send the players object to this client
-        socket.emit('currentPlayers', players);
+        socket.emit('currentPlayers', game.clients);
 
         // update all other players of the new player
-        socket.broadcast.to(roomName).emit('newPlayer', players[socket.id]);
+        socket.broadcast.to(roomName).emit('newPlayer', game.clients[socket.id]);
 
         // send the star object
         socket.emit('starLocation', { x: game.star.x, y: game.star.y });

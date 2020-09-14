@@ -19,7 +19,7 @@ class Instance extends Phaser.Scene {
         this.load.image('refreshButton', 'assets/images/refreshButton.png');
         this.load.tilemapTiledJSON('dungeon', 'assets/tilemaps/TileMap.json');
         this.load.image('gameTiles', 'assets/tilemaps/DungeonTileSet.png');
-    
+
         this.load.image('ship', 'assets/spaceShips_001.png');
         this.load.image('star', 'assets/star_gold.png');
     }
@@ -28,32 +28,39 @@ class Instance extends Phaser.Scene {
         // Declare this for consistent usage within function scopes
         // (Use 'self' instead of 'this' when in a function block)
         const self = this;
-        
-    
+
+
         // this.disconnectTimer = setTimeout(() => {
         //     console.log("Well that escalated quickly");
         // }, 2000);
-    
+
         /* ==========Define functions========== */
-    
-        this.addPlayer = (playerInfo) => {
+
+        this.addPlayer = (playerId) => {
             let player = self.add.sprite(self.playerSpawnPoints[0].x, self.playerSpawnPoints[0].y, 'player');
             // player.anchor.setTo(.5);
             // player.scale.setTo(self.spriteScale);
             // player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
-            player.playerId = playerInfo.playerId;
+            player.playerId = playerId;
+            player.input = {
+                left: false,
+                right: false,
+                up: false,
+                down: false
+            }
             // player.body.collideWorldBounds = true; // in case they cheat and get out of the walls
             //self.game.physics.arcade.enable(player);
-    
+
             /* Teh SP34R */
             // player.spear = player.addChild(self.make.sprite(10, 0, 'spear'));
             // player.spear.exhausted = false; // A bool to check if it has already delt its desired damage after being used 
             //game.physics.arcade.enable(player.spear);
             // player.spear.anchor.setTo(.5);
-    
+
             self.players.add(player);
+            self.clients[playerId] = player;
         };
-    
+
         this.addBaddie = (baddieInfo) => {
             // console.log("Creating baddie: " + baddieInfo.id);
             let baddie = self.baddies.create(self.baddieSpawnPoints.x, self.baddieSpawnPoints.y, 'baddie');
@@ -61,13 +68,13 @@ class Instance extends Phaser.Scene {
             // baddie.anchor.setTo(.5);
             // baddie.health = 30;
             //baddie.targetPlayerId = baddieData.targetPlayerId;
-    
+
             //this.game.physics.arcade.enable(baddie);
             // self.baddies.add(baddie);
             //this.game.physics.arcade.enable(this.baddies)
             //this.actors.add(baddie)
         };
-    
+
         this.handlePlayerMovement = (playerId, input) => {
             self.players.getChildren().forEach((player) => {
                 if (playerId === player.playerId) {
@@ -75,7 +82,7 @@ class Instance extends Phaser.Scene {
                 }
             });
         };
-    
+
         this.handlePlayerAttack = (playerId, input) => {
             let angleInRad = input;
             self.players.getChildren().forEach((player) => {
@@ -113,7 +120,7 @@ class Instance extends Phaser.Scene {
                         player.spear.x = player.width / 2;
                         player.spear.y = -player.height / 2;
                     }
-    
+
                     self.game.time.events.add(50, () => {
                         self.game.physics.arcade.overlap(player.spear, self.baddies, self.damage, () => {
                             return !player.spear.exhausted;
@@ -127,16 +134,16 @@ class Instance extends Phaser.Scene {
                     }, self);
                 }
             });
-    
-    
+
+
         };
-    
+
         this.damage = (weapon, attacked) => {
             weapon.exhausted = true;
             attacked.damage(10);
             console.log(attacked.id + ": " + attacked.health);
         };
-    
+
         this.removePlayer = (playerId) => {
             self.players.getChildren().forEach((player) => {
                 if (playerId === player.playerId) {
@@ -144,43 +151,43 @@ class Instance extends Phaser.Scene {
                 }
             });
         };
-    
+
         // ======Setting up the map=============
-    
+
         // Adds a tilemap object to the phaser game so that phaser can read from it
         this.map = this.make.tilemap({ key: 'dungeon' });
         // Selects the tilemap you are using.  TODO: After multiple maps are created, select one of the maps.
         this.tileset = this.map.addTilesetImage('DungeonSet', 'gameTiles');
-    
+
         /* Sets background layer to layer called 'backgroundLayer' inside of the tilemap.
            Should leave these the same for every map for consistency purposes. */
         this.backgroundlayer = this.map.createStaticLayer('backgroundLayer', this.tileset, 0, 0);
         this.wallLayer = this.map.createStaticLayer('wallLayer', this.tileset, 0, 0);
-    
+
         this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
-    
+
         //this.backgroundlayer.resizeWorld();
-    
+
         // =======Players========
         this.spriteScale = 1;
-    
+
         // 0 in this function means objectLayer (and hopefully stays that way)
         this.playerSpawnPoints = findObjectsByType('playerStart', this.map, 'objectLayer');
         this.baddieSpawnPoints = findObjectsByType('enemy', this.map, 'objectLayer');
-    
+
         this.clients = {};
         this.message = 0;
         this.players = this.physics.add.group();
         this.baddies = this.physics.add.group();
-    
+
         this.scores = {
             blue: 0,
             red: 0
         };
-    
+
         this.star = this.physics.add.image(randomPosition(700), randomPosition(500), 'star');
         this.physics.add.collider(this.players);
-    
+
         this.physics.add.overlap(this.players, this.star, function (star, player) {
             if (self.clients[player.playerId].team === 'red') {
                 self.scores.red += 10;
@@ -191,14 +198,14 @@ class Instance extends Phaser.Scene {
             }
             self.star.setPosition(randomPosition(700), randomPosition(500));
         });
-    
+
         window.gameLoaded(this);
     }
 
     update() {
         this.message += 1;
-        this.players.getChildren().forEach((player) => {
-            const input = this.clients[player.playerId].input;
+        Object.keys(this.clients).forEach(player => {
+            const input = this.clients[player].input;
             if (input.left) {
                 player.body.velocity.x = -120;
             }
@@ -211,7 +218,7 @@ class Instance extends Phaser.Scene {
             if (input.down) {
                 player.body.velocity.y = 120;
             }
-    
+
             // this.clients[player.playerId].x = player.x;
             // this.clients[player.playerId].y = player.y;
         });
