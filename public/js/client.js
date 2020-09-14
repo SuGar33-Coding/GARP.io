@@ -28,21 +28,15 @@ export default class Client {
         this.socket.on('playerUpdate', playerData => {
             if(this.enteredDungeon) {
                 const scene = this.game.scene.keys['Dungeon'];
-                console.log('About to call updatePlayers')
                 scene.updatePlayers(playerData);
                 scene.resetDisconnectTimeout();
             }
         })
     }
 
-    joinDungeon(name) {
-        this.socket.emit('joinDungeon', name, (dungeon) => {
-            if (dungeon) {
-                this.game.scene.switch('ServerList', 'Dungeon');
-                console.log(this.game)
-            } else {
-                alert("Dungeon does not exist");
-            }
+    joinDungeon(name, callback) {
+        this.socket.emit('joinDungeon', name, (joined) => {
+            callback(joined);
         });
     }
 

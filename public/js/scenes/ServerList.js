@@ -12,6 +12,8 @@ export default class ServerList extends Phaser.Scene {
         this.load.image('joinButton', 'assets/images/joinButton.png');
         this.load.image('deleteButton', 'assets/images/deleteButton.png');
         this.load.image('refreshButton', 'assets/images/refreshButton.png');
+
+        this.dungeonJoined = false;
     }
 
     create() {
@@ -48,7 +50,11 @@ export default class ServerList extends Phaser.Scene {
     startGame() {
         let dungeonName = prompt("Dungeon to join", "default");
 
-        this.game.client.joinDungeon(dungeonName);
+        this.game.client.joinDungeon(dungeonName, joined => {
+            if (joined) {
+                this.scene.start('Dungeon');
+            }
+        });
     }
 
     /**
