@@ -1,0 +1,23 @@
+            
+
+			Just shared data and use Update Loop to check for changes
+			or
+			Make some callback funcs on the Socketio Client so the Socketio Client doesn't have to have a reference to the Game client
+			
+            Game-Client
+            -Read
+              |
+            Shared Obj
+              |
+            -Write
+            Socketio-Client
+            	|
+            	|
+            	|
+            	|
+            	|
+            Socketio-Server
+
+            Game-Server
+
+            
