@@ -79,6 +79,7 @@ class Instance extends Phaser.Scene {
             self.players.getChildren().forEach((player) => {
                 if (playerId === player.playerId) {
                     this.clients[player.playerId].input = input;
+                    player.input = input;
                 }
             });
         };
@@ -229,8 +230,21 @@ class Instance extends Phaser.Scene {
         // console.log(this.players)
         this.players.getChildren().forEach(player => {
             this.clients[player.playerId] = player;
-            // console.log(`Started: ${this.playerSpawnPoints[0].y}`)
-            // console.log(player.y)
+            
+            const input = player.input;
+            player.setVelocity(0,0);
+            if (input.left) {
+                player.setVelocityX(-120);
+            }
+            if (input.right) {
+                player.setVelocityX(120);
+            }
+            if (input.up) {
+                player.setVelocityY(-120);
+            }
+            if (input.down) {
+                player.setVelocityY(120);
+            }
         })
     }
 

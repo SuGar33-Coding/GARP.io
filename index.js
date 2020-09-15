@@ -79,7 +79,7 @@ io.on('connection', socket => {
 
     // when a player moves, takes in a json that tells it what key is pressed down, then updates the player data
     socket.on('playerMovement', inputData => {
-        game.handlePlayerMovement(socket.id, inputData);
+        socket.game.handlePlayerMovement(socket.id, inputData);
     });
 
     // same for when a player attacks
@@ -111,6 +111,7 @@ io.on('connection', socket => {
         }
 
         // get the phaser instance, including its functions
+        socket.game = instances[roomName];
         game = instances[roomName];
         // get list of players by socket.io id in this instance
         // players = game.clients;
