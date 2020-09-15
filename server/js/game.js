@@ -37,7 +37,8 @@ class Instance extends Phaser.Scene {
         /* ==========Define functions========== */
 
         this.addPlayer = (playerId) => {
-            let player = self.add.sprite(self.playerSpawnPoints[0].x, self.playerSpawnPoints[0].y, 'player');
+            let player = self.physics.add.sprite(self.playerSpawnPoints[0].x, self.playerSpawnPoints[0].y, 'player')
+                .setVelocity(0, -5);
             // player.anchor.setTo(.5);
             // player.scale.setTo(self.spriteScale);
             // player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
@@ -58,7 +59,6 @@ class Instance extends Phaser.Scene {
             // player.spear.anchor.setTo(.5);
 
             self.players.add(player);
-            self.clients[playerId] = player;
         };
 
         this.addBaddie = (baddieInfo) => {
@@ -157,14 +157,16 @@ class Instance extends Phaser.Scene {
         // Adds a tilemap object to the phaser game so that phaser can read from it
         this.map = this.make.tilemap({ key: 'dungeon' });
         // Selects the tilemap you are using.  TODO: After multiple maps are created, select one of the maps.
-        this.tileset = this.map.addTilesetImage('DungeonSet', 'gameTiles');
+        this.map.addTilesetImage('DungeonSet', 'gameTiles');
 
         /* Sets background layer to layer called 'backgroundLayer' inside of the tilemap.
            Should leave these the same for every map for consistency purposes. */
-        this.backgroundlayer = this.map.createStaticLayer('backgroundLayer', this.tileset, 0, 0);
-        this.wallLayer = this.map.createStaticLayer('wallLayer', this.tileset, 0, 0);
+        this.backgroundlayer = this.map.createStaticLayer('backgroundLayer', 'DungeonSet')
 
-        this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
+        // this.wallLayer = this.map.createLayer('wallLayer');
+        this.wallLayer = this.map.createStaticLayer('wallLayer', 'DungeonSet');
+
+        // this.map.setCollisionBetween(1, 2000, true, 'wallLayer');
 
         //this.backgroundlayer.resizeWorld();
 
@@ -177,51 +179,63 @@ class Instance extends Phaser.Scene {
 
         this.clients = {};
         this.message = 0;
-        this.players = this.physics.add.group();
+        this.players = this.add.group();
         this.baddies = this.physics.add.group();
+        this.players.set
 
         this.scores = {
             blue: 0,
             red: 0
         };
 
-        this.star = this.physics.add.image(randomPosition(700), randomPosition(500), 'star');
+        // this.star = this.physics.add.image(randomPosition(700), randomPosition(500), 'star');
         this.physics.add.collider(this.players);
 
-        this.physics.add.overlap(this.players, this.star, function (star, player) {
-            if (self.clients[player.playerId].team === 'red') {
-                self.scores.red += 10;
-                //console.log(self.scores.red);
-            } else {
-                self.scores.blue += 10;
-                //console.log(self.scores.blue);
-            }
-            self.star.setPosition(randomPosition(700), randomPosition(500));
-        });
+        // this.physics.add.overlap(this.players, this.star, function (star, player) {
+        //     if (self.clients[player.playerId].team === 'red') {
+        //         self.scores.red += 10;
+        //         //console.log(self.scores.red);
+        //     } else {
+        //         self.scores.blue += 10;
+        //         //console.log(self.scores.blue);
+        //     }
+        //     self.star.setPosition(randomPosition(700), randomPosition(500));
+        // });
 
         window.gameLoaded(this);
     }
 
     update() {
         this.message += 1;
-        Object.keys(this.clients).forEach(player => {
-            const input = this.clients[player].input;
-            if (input.left) {
-                player.body.velocity.x = -120;
-            }
-            if (input.right) {
-                player.body.velocity.x = 120;
-            }
-            if (input.up) {
-                player.body.velocity.y = -120;
-            }
-            if (input.down) {
-                player.body.velocity.y = 120;
-            }
+        // Object.keys(this.clients).forEach(player => {
+        //     const input = this.clients[player].input;
+        //     if (input.left) {
+        //         player.body.velocity.x = -120;
+        //     }
+        //     if (input.right) {
+        //         player.body.velocity.x = 120;
+        //     }
+        //     if (input.up) {
+        //         player.body.velocity.y = -120;
+        //     }
+        //     if (input.down) {
+        //         player.body.velocity.y = 120;
+        //     }
 
-            // this.clients[player.playerId].x = player.x;
-            // this.clients[player.playerId].y = player.y;
-        });
+        //     // this.clients[player.playerId].x = player.x;
+        //     // this.clients[player.playerId].y = player.y;
+        // });
+
+        // console.log(this.players)
+        this.players.getChildren().forEach(player => {
+            this.clients[player.playerId] = player;
+            // console.log(`Started: ${this.playerSpawnPoints[0].y}`)
+            // console.log(player.y)
+        })
+    }
+
+    getClients(callback) {
+        callback(this.clients);
     }
 }
 

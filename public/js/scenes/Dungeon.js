@@ -2,6 +2,8 @@
 //import game from "../ClientGame.js/index.js"
 
 export default class Dungeon extends Phaser.Scene {
+    socketId;
+
     constructor() {
         super({
             key: 'Dungeon',
@@ -11,6 +13,11 @@ export default class Dungeon extends Phaser.Scene {
     }
 
     create() {
+        // Get Socket.io ID
+        this.game.client.getId(id => {
+            this.socketId = id;
+        })
+
         // ======Setting up the map=============
 
         this.disconnectTimer = setTimeout(() => {
@@ -41,7 +48,7 @@ export default class Dungeon extends Phaser.Scene {
         // var playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer');
         let playerStarts = this.findObjectsByType('playerStart', this.map, 'objectLayer')
         this.map.getObjectLayer()
-        this.player = this.physics.add.sprite(playerStarts[0].x, playerStarts[0].y, 'player')
+        this.player = this.physics.add.sprite(0, 0, 'player')
             .setScale(this.spriteScale);
         this.player.id = this.game.client.socket.id;
         // this.player.smoothed = false;  // If we dont do this it looks like garbo cus of anti aliasing
@@ -241,6 +248,13 @@ export default class Dungeon extends Phaser.Scene {
         if (this.player.positon !== this.player.previousPosition) {
             this.game.client.playerMoved({ xPos: this.player.x, yPos: this.player.y });
         }*/
+
+        this.game.client.getPlayers(players => {
+            let me = players[this.socketId];
+            if (me) {
+                this.player.setPosition(me.x, me.y);
+            }
+        })
     }
 
     // Calculating damage and collecting treasure moved to server side

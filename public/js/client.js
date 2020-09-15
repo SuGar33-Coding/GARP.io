@@ -2,6 +2,8 @@
 // import game from "./ClientGame.js";
 
 export default class Client {
+    players = {};
+
     constructor(gameInstance) {
         // this.scene = gameInstance.scene.getScene('Dungeon');
         this.game = gameInstance;
@@ -13,7 +15,6 @@ export default class Client {
             console.log(data);
         });
         this.socket.on('update', (updatePackage) => {
-            console.log('gothere')
             if (this.enteredDungeon) {
                 const scene = this.game.scene.get('Dungeon');
                 scene.updateBaddies(updatePackage.baddies);
@@ -27,11 +28,17 @@ export default class Client {
         });
         this.socket.on('playerUpdate', playerData => {
             if(this.enteredDungeon) {
-                const scene = this.game.scene.keys['Dungeon'];
-                scene.updatePlayers(playerData);
-                scene.resetDisconnectTimeout();
+                this.players = playerData;
             }
         })
+    }
+
+    getId(callback) {
+        callback(this.socket.id);
+    }
+
+    getPlayers(callback) {
+        callback(this.players);
     }
 
     joinDungeon(name, callback) {

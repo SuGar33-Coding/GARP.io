@@ -141,7 +141,7 @@ io.on('connection', socket => {
         socket.broadcast.to(roomName).emit('newPlayer', game.clients[socket.id]);
 
         // send the star object
-        socket.emit('starLocation', { x: game.star.x, y: game.star.y });
+        // socket.emit('starLocation', { x: game.star.x, y: game.star.y });
 
         // send the current scores
         socket.emit('updateScore', game.scores);
@@ -173,9 +173,11 @@ server.sendUpdate = () => {
     // TODO: Bundle all these updates into one update package
     Object.keys(instances).forEach(roomName => {
         let game = instances[roomName];
-        io.to(roomName).emit('playerUpdate', game.clients);
+        game.getClients(clients => {
+            io.to(roomName).emit('playerUpdate', clients);
+        })
         io.to(roomName).emit('updateScore', game.scores);
-        io.to(roomName).emit('starLocation', { x: game.star.x, y: game.star.y });
+        // io.to(roomName).emit('starLocation', { x: game.star.x, y: game.star.y });
     });
 };
 
